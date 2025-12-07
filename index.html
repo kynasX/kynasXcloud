@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kynas Cloud - Panel Pterodactyl & VPS</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #38bdf8;
+      --primary-dark: #0ea5e9;
+      --secondary: #8b5cf6;
+      --bg: #0b1224;
+      --card: #1e293b;
+      --text: #e2e8f0;
+      --text-light: #94a3b8;
+      --border: rgba(255, 255, 255, 0.12);
+      --ok: #10b981;
+      --err: #ef4444;
+      --warning: #f59e0b;
+      --radius: 16px;
+      --gap: 24px;
+      --pad: 32px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    .preloader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    .loader-text {
+      font-size: 3rem;
+      font-weight: 800;
+      display: flex;
+      gap: 5px;
+    }
+
+    .loader-Kynas {
+      color: var(--text); 
+    }
+
+    .loader-cloud {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent; 
+    }
+
+    .container {
+      width: min(100%, 1200px);
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: rgba(11, 18, 36, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      z-index: 1000;
+      padding: 1.2rem 0;
+      transition: var(--transition);
+    }
+
+    .navbar.scrolled {
+      padding: 1rem 0;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-logo {
+      font-size: 1.8rem;
+      font-weight: 800;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .nav-logo span {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .nav-menu {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-link {
+      color: var(--text-light);
+      text-decoration: none;
+      font-weight: 500;
+      transition: var(--transition);
+      position: relative;
+      padding: 5px 0;
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--primary);
+      transition: width 0.3s;
+    }
+
+    .nav-link:hover {
+      color: var(--text);
+    }
+
+    .nav-link:hover::after {
+      width: 100%;
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .nav-cta {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 10px 24px;
+      border-radius: var(--radius);
+      text-decoration: none;
+      font-weight: 600;
+      transition: var(--transition);
+      box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+    }
+
+    .nav-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(56, 189, 248, 0.4);
+    }
+
+    .theme-toggle {
+      background: var(--card);
+      border: none;
+      color: var(--text);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .theme-toggle:hover {
+      background: var(--primary);
+      color: white;
+      transform: rotate(30deg);
+    }
+
+    .hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .hero {
+      padding: 180px 0 100px;
+      text-align: center;
+      background: linear-gradient(135deg, rgba(11, 18, 36, 0.9), rgba(30, 41, 59, 0.8));
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><path fill="%2338bdf8" opacity="0.05" d="M0,0L1000,0L1000,1000L0,1000Z"/></svg>');
+      background-size: cover;
+      z-index: -1;
+    }
+
+    .hero-title {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      line-height: 1.2;
+      background: linear-gradient(135deg, var(--text), var(--primary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--text-light);
+      max-width: 700px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .hero-badges {
+      display: flex;
+      gap: 0.8rem;
+      margin-top: 2rem;
+      padding-bottom: 0.5rem;
+      overflow-x: auto;
+      justify-content: center;
+      scrollbar-width: thin;              
+    }
+
+    .hero-badges::-webkit-scrollbar {
+      height: 6px;
+    }
+    .hero-badges::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .hero-badges::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.6);
+      border-radius: 999px;
+    }
+
+    .badge {
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      padding: 10px 16px;
+      border-radius: 50px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text);
+      white-space: nowrap;      
+      transition: var(--transition);
+    }
+
+    .badge:hover {
+      transform: translateY(-3px);
+      background: rgba(56, 189, 248, 0.18);
+      border-color: var(--primary);
+    }
+
+    .badge i {
+      color: var(--primary);
+    }
+
+    section {
+      padding: 80px 0;
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 4vw, 3rem);
+      text-align: center;
+      margin-bottom: 1rem;
+      font-weight: 800;
+    }
+
+    .section-title span {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .section-subtitle {
+      text-align: center;
+      color: var(--text-light);
+      max-width: 700px;
+      margin: 0 auto 3rem;
+      font-size: 1.1rem;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: var(--gap);
+      margin-top: 3rem;
+    }
+
+    .feature-item {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: var(--pad);
+      border: 1px solid var(--border);
+      transition: var(--transition);
+      text-align: center;
+    }
+
+    .feature-item:hover {
+      transform: translateY(-10px);
+      border-color: var(--primary);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .feature-icon {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      font-size: 1.5rem;
+      color: white;
+    }
+
+    .feature-item h3 {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+
+    .feature-item p {
+      color: var(--text-light);
+      font-size: 0.95rem;
+    }
+
+    .package-toggle {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin: 3rem 0 4rem;
+      flex-wrap: wrap;
+    }
+
+    .toggle-btn {
+      background: var(--card);
+      border: 2px solid var(--border);
+      color: var(--text-light);
+      padding: 15px 30px;
+      border-radius: var(--radius);
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toggle-btn.active {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(56, 189, 248, 0.3);
+    }
+
+    .toggle-btn:hover:not(.active) {
+      border-color: var(--primary);
+      color: var(--text);
+      transform: translateY(-2px);
+    }
+
+    .toggle-btn i {
+      font-size: 1.1rem;
+    }
+
+    .package-container {
+      display: none;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .package-container.active {
+      display: block;
+    }
+
+    .packages {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: var(--gap);
+    }
+
+    .package-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: var(--pad);
+      border: 1px solid var(--border);
+      transition: var(--transition);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .package-card:hover {
+      transform: translateY(-10px);
+      border-color: var(--primary);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .package-card.featured {
+      border: 2px solid var(--primary);
+      transform: scale(1.05);
+    }
+
+    .package-card.featured:hover {
+      transform: scale(1.05) translateY(-10px);
+    }
+
+    .package-badge {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .package-name {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .package-name i {
+      color: var(--primary);
+      font-size: 1.3rem;
+    }
+
+    .package-specs {
+      list-style: none;
+      margin-bottom: 1.5rem;
+      flex-grow: 1;
+    }
+
+    .package-specs li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .package-specs li:last-child {
+      border-bottom: none;
+    }
+
+    .package-specs i {
+      color: var(--primary);
+      width: 20px;
+    }
+
+    .price {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+    }
+
+    .price-period {
+      font-size: 1rem;
+      color: var(--text-light);
+      font-weight: 400;
+    }
+
+    .buy-btn {
+      display: block;
+      width: 100%;
+      text-align: center;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 15px;
+      border-radius: var(--radius);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .buy-btn:hover:not(.disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(56, 189, 248, 0.4);
+    }
+
+    .buy-btn.disabled {
+      background: var(--err);
+      cursor: not-allowed;
+      opacity: 0.7;
+      transform: none !important;
+    }
+
+    .buy-btn.disabled i {
+      color: white !important;
+    }
+
+    .faq-container {
+      max-width: 800px;
+      margin: 3rem auto 0;
+    }
+
+    .faq-item {
+      background: var(--card);
+      border-radius: var(--radius);
+      margin-bottom: 1rem;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      transition: var(--transition);
+    }
+
+    .faq-item:hover {
+      border-color: var(--primary);
+    }
+
+    .faq-question {
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 1.5rem;
+      text-align: left;
+      color: var(--text);
+      font-size: 1.1rem;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .faq-question i {
+      transition: transform 0.3s;
+      color: var(--primary);
+    }
+
+    .faq-item.active .faq-question i {
+      transform: rotate(180deg);
+    }
+
+    .faq-answer {
+      padding: 0 1.5rem;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .faq-item.active .faq-answer {
+      padding-bottom: 1.5rem;
+      max-height: 500px;
+    }
+
+    .faq-answer p {
+      color: var(--text-light);
+      line-height: 1.8;
+    }
+
+    .cta-section {
+      text-align: center;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: var(--radius);
+      padding: 4rem;
+      margin: 4rem 0;
+    }
+
+    .cta-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      color: white;
+    }
+
+    .cta-subtitle {
+      font-size: 1.2rem;
+      color: rgba(255, 255, 255, 0.9);
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    footer {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 4rem 0 2rem;
+      text-align: center;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-logo {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+
+    .footer-logo span {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    footer p {
+      color: var(--text-light);
+      margin-bottom: 2rem;
+      max-width: 500px;
+      margin: 0 auto 2rem;
+    }
+
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin: 2rem 0 3rem;
+    }
+
+    .social-links a {
+      width: 50px;
+      height: 50px;
+      background: var(--card);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 1.2rem;
+      transition: var(--transition);
+      border: 1px solid var(--border);
+    }
+
+    .social-links a:hover {
+      background: var(--primary);
+      color: white;
+      transform: translateY(-5px);
+      border-color: var(--primary);
+    }
+
+    .copyright {
+      color: var(--text-light);
+      font-size: 0.9rem;
+      margin-top: 2rem;
+    }
+
+    .back-to-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 50px;
+      height: 50px;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: var(--transition);
+      z-index: 100;
+      border: none;
+      cursor: pointer;
+    }
+
+    .back-to-top.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .back-to-top:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(56, 189, 248, 0.4);
+    }
+
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .theme-toggle {
+      display: none !important;
+    }
+
+    @media (max-width: 1024px) {
+      .packages {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      }
+    }
+
+    @media (max-width: 768px) {
+      .hamburger {
+        display: block;
+      }
+
+      .nav-menu {
+        position: fixed;
+        top: 80px;
+        left: 0;
+        width: 100%;
+        background: var(--bg);
+        flex-direction: column;
+        padding: 2rem;
+        gap: 1rem;
+        transform: translateY(-100%);
+        opacity: 0;
+        visibility: hidden;
+        transition: var(--transition);
+        border-bottom: 1px solid var(--border);
+        z-index: 999;
+      }
+
+      .nav-menu.active {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .nav-cta {
+        display: none;
+      }
+
+      .hero {
+        padding: 150px 0 80px;
+      }
+
+      .hero-badges {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .package-toggle {
+        flex-direction: column;
+      }
+
+      .toggle-btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .package-card.featured {
+        transform: none;
+      }
+
+      .package-card.featured:hover {
+        transform: translateY(-10px);
+      }
+
+      .cta-section {
+        padding: 3rem 2rem;
+      }
+
+      .cta-title {
+        font-size: 2rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .packages {
+        grid-template-columns: 1fr;
+      }
+
+      .feature-item {
+        padding: 1.5rem;
+      }
+
+      .hero-title {
+        font-size: 2rem;
+      }
+
+      .section-title {
+        font-size: 1.8rem;
+      }
+
+      .price {
+        font-size: 2rem;
+      }
+    }
+        /* --- CSS UNTUK MODAL POPUP --- */
+    .modal-overlay {
+      display: none; /* Hidden by default */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 10000;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 30px;
+      border-radius: var(--radius);
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      position: relative;
+      transform: translateY(20px);
+      transition: transform 0.3s ease;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+
+    .modal-overlay.active .modal-box {
+      transform: translateY(0);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: none;
+      border: none;
+      color: var(--text-light);
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .modal-close:hover {
+      color: var(--err);
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+
+    .modal-desc {
+      color: var(--text-light);
+      margin-bottom: 25px;
+      font-size: 0.95rem;
+    }
+
+    .modal-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .btn-contact {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px;
+      border-radius: var(--radius);
+      text-decoration: none;
+      font-weight: 600;
+      color: white;
+      transition: var(--transition);
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .btn-wa {
+      background: #25D366;
+    }
+    .btn-wa:hover {
+      background: #1fae53;
+      transform: translateY(-2px);
+    }
+
+    .btn-tg {
+      background: #0088cc;
+    }
+    .btn-tg:hover {
+      background: #0077b5;
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+  <div class="preloader">
+    <div class="loader-text">
+      <span class="loader-Kynas">kynasX</span><span class="loader-cloud">cloud</span>
+    </div>
+  </div>
+
+  <nav class="navbar" id="navbar">
+    <div class="container">
+      <div class="nav-container">
+        <a href="#" class="nav-logo">kynasX<span>cloud</span></a>
+        
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="#home" class="nav-link">Beranda</a></li>
+          <li><a href="#features" class="nav-link">Fitur</a></li>
+          <li><a href="#pricing" class="nav-link">Paket</a></li>
+          <li><a href="#faq" class="nav-link">FAQ</a></li>
+          <li><a href="https://t.me/kynasXinfo" class="nav-link">Channel</a></li>
+        </ul>
+        
+        <div class="nav-controls">
+          <a href="#pricing" class="nav-cta">Mulai Sekarang</a>
+          <button class="theme-toggle" id="theme-toggle">
+            <i class="fas fa-moon"></i>
+          </button>
+          <button class="hamburger" id="hamburger">
+            <i class="fas fa-bars"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero" id="home">
+    <div class="container">
+      <h1 class="hero-title fade-in">Juaranya Hosting Pterodactyl & VPS terbaik</h1>
+      <p class="hero-subtitle fade-in" style="transition-delay: 0.1s;">KynasX menghadirkan solusi server dengan performa tangguh dan responsivitas tinggi. Pengalaman hosting terbaik dengan dukungan teknis yang bisa Anda andalkan 24/7.</p>
+    </div>
+  </header>
+
+  <main>
+    <section id="features">
+      <div class="container">
+        <h2 class="section-title fade-in">Mengapa Memilih <span>kynasXcloud?</span></h2>
+        <p class="section-subtitle fade-in">Kami menghadirkan standar baru dalam dunia hosting dengan infrastruktur yang stabil dan fitur yang memanjakan pengguna.</p>
+        
+        <div class="features-grid">
+          <div class="feature-item fade-in">
+            <div class="feature-icon"><i class="fas fa-tachometer-alt"></i></div>
+            <h3>Akselerasi Maksimal</h3>
+            <p>Didukung penyimpanan NVMe Enterprise untuk proses baca-tulis data super kencang tanpa hambatan.</p>
+          </div>
+          
+          <div class="feature-item fade-in" style="transition-delay: 0.2s;">
+            <div class="feature-icon"><i class="fas fa-headset"></i></div>
+            <h3>Support Responsif</h3>
+            <p>Tim teknis kami selalu siaga memberikan solusi cepat untuk setiap kendala server Anda.</p>
+          </div>
+          
+          <div class="feature-item fade-in" style="transition-delay: 0.3s;">
+            <div class="feature-icon"><i class="fas fa-cogs"></i></div>
+            <h3>Kontrol Penuh</h3>
+            <p>Kelola resource dan konfigurasi server dengan leluasa melalui panel Pterodactyl yang intuitif.</p>
+          </div>
+          
+          <div class="feature-item fade-in" style="transition-delay: 0.4s;">
+            <div class="feature-icon"><i class="fas fa-network-wired"></i></div>
+            <h3>Jaringan Low Latency</h3>
+            <p>Jalur koneksi prioritas yang menjamin ping rendah, ideal untuk gaming dan aplikasi berat.</p>
+          </div>
+          
+          <div class="feature-item fade-in" style="transition-delay: 0.5s;">
+            <div class="feature-icon"><i class="fas fa-bolt"></i></div>
+            <h3>Stabilitas Terjaga</h3>
+            <p>Jaminan uptime tinggi dengan infrastruktur tangguh yang menjaga server tetap aktif 24/7.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="pricing">
+        <div class="container">
+        <h2 class="section-title fade-in">Spesifikasi Server <span>kynasXcloud</span></h2>
+         <p class="section-subtitle fade-in">Tersedia berbagai pilihan konfigurasi yang dirancang khusus untuk memaksimalkan efisiensi dan stabilitas layanan Anda.</p>
+
+        <div class="package-toggle fade-in">
+          <button class="toggle-btn active" data-package="panel">
+            <i class="fas fa-server"></i> Panel Pterodactyl
+          </button>
+          <button class="toggle-btn" data-package="vps">
+            <i class="fas fa-cube"></i> Virtual Private Server
+          </button>
+        </div>
+        
+        <div id="panel-package" class="package-container active">
+          <div class="packages">
+            <div class="package-card fade-in">
+              <h3 class="package-name"><i class="fas fa-server"></i> KynasX I</h3>
+              <p class="package-description" style="color: var(--text-light); margin-bottom: 1rem; font-size: 0.9rem;">Cocok untuk bot menengah dengan traffic sedang</p>
+              <ul class="package-specs">
+                <li><i class="fas fa-memory"></i> 2GB RAM</li>
+                <li><i class="fas fa-hdd"></i> 5GB Disk Space</li>
+                <li><i class="fas fa-microchip"></i> 150% CPU</li>
+                <li><i class="fas fa-shield-alt"></i> DDoS Protection</li>
+              </ul>
+              <p class="price">Rp 5.000<span class="price-period">/ bulan</span></p>
+              <button class="buy-btn" data-paket-id="panel-1">
+              <i class="fas fa-shopping-cart"></i> Pesan Sekarang
+              </button>
+
+            </div>
+
+            <div class="package-card featured fade-in" style="transition-delay: 0.1s">
+              <span class="package-badge">POPULAR</span>
+              <h3 class="package-name"><i class="fas fa-server"></i> KynasX II</h3>
+              <p class="package-description" style="color: var(--text-light); margin-bottom: 1rem; font-size: 0.9rem;">Pilihan tepat untuk bot dengan performa optimal</p>
+              <ul class="package-specs">
+                <li><i class="fas fa-memory"></i> 3GB RAM</li>
+                <li><i class="fas fa-hdd"></i> 7GB Disk Space</li>
+                <li><i class="fas fa-microchip"></i> 200% CPU</li>
+                <li><i class="fas fa-shield-alt"></i> DDoS Protection</li>
+              </ul>
+              <p class="price">Rp 6.000<span class="price-period">/ bulan</span></p>
+              <button class="buy-btn" data-paket-id="panel-2">
+                <i class="fas fa-shopping-cart"></i> Pesan Sekarang
+              </button>
+            </div>
+
+            <div class="package-card fade-in" style="transition-delay: 0.2s">
+              <h3 class="package-name"><i class="fas fa-server"></i> KynasX III</h3>
+              <p class="package-description" style="color: var(--text-light); margin-bottom: 1rem; font-size: 0.9rem;">Untuk kebutuhan yang membutuhkan resource lebih</p>
+              <ul class="package-specs">
+                <li><i class="fas fa-memory"></i> 5GB RAM</li>
+                <li><i class="fas fa-hdd"></i> 10GB Disk Space</li>
+                <li><i class="fas fa-microchip"></i> 250% CPU</li>
+                <li><i class="fas fa-shield-alt"></i> DDoS Protection</li>
+              </ul>
+              <p class="price">Rp 8.000<span class="price-period">/ bulan</span></p>
+              <button class="buy-btn" data-paket-id="panel-3">
+                <i class="fas fa-shopping-cart"></i> Pesan Sekarang
+              </button>
+            </div>
+
+            <div class="package-card fade-in" style="transition-delay: 0.3s">
+              <h3 class="package-name"><i class="fas fa-server"></i> KynasX IV</h3>
+              <p class="package-description" style="color: var(--text-light); margin-bottom: 1rem; font-size: 0.9rem;">Paket power untuk projects yang membutuhkan performa tinggi</p>
+              <ul class="package-specs">
+                <li><i class="fas fa-memory"></i> 7GB RAM</li>
+                <li><i class="fas fa-hdd"></i> 13GB Disk Space</li>
+                <li><i class="fas fa-microchip"></i> 300% CPU</li>
+                <li><i class="fas fa-shield-alt"></i> DDoS Protection</li>
+              </ul>
+              <p class="price">Rp 10.000<span class="price-period">/ bulan</span></p>
+              <button class="buy-btn" data-paket-id="panel-4">
+                <i class="fas fa-shopping-cart"></i> Pesan Sekarang
+              </button>
+            </div>
+
+            <div class="package-card fade-in" style="transition-delay: 0.4s">
+              <h3 class="package-name"><i class="fas fa-server"></i> KynasX V</h3>
+              <p class="package-description" style="color: var(--text-light); margin-bottom: 1rem; font-size: 0.9rem;">Ideal untuk server dengan traffic padat</p>
+              <ul class="package-specs">
+                <li><i class="fas fa-memory"></i> 10GB RAM</li>
+                <li><i class="fas fa-hdd"></i> 15GB Disk Space</li>
+                <li><i class="fas fa-microchip"></i> 350% CPU</li>
+                <li><i class="fas fa-shield-alt"></i> DDoS Protection</li>
+              </ul>
+              <p class="price">Rp 15.000<span class="price-period">/ bulan</span></p>
+              <button class="buy-btn" data-paket-id="panel-5">
+                <i class="fas fa-shopping-cart"></i> Pesan Sekarang
+              </button>
+            </div>
+
+            <div class="package-card fade-in" style="transition-delay: 0.5s">
+              <h3 class="package-name"><i class="fas fa-server"></i> KynasX VI</h3>
+              <p class="package-description" style="color: var(--text-light); margin-bottom: 1rem; font-size: 0.9rem;">Solusi enterprise dengan resource maksimal</p>
+              <ul class="package-specs">
+                <li><i class="fas fa-memory"></i> 15GB RAM</li>
+                <li><i class="fas fa-hdd"></i> 20GB Disk Space</li>
+                <li><i class="fas fa-microchip"></i> 400% CPU</li>
+                <li><i class="fas fa-shield-alt"></i> DDoS Protection</li>
+              </ul>
+              <p class="price">Rp 20.000<span class="price-period">/ bulan</span></p>
+              <button class="buy-btn" data-paket-id="panel-6">
+                <i class="fas fa-shopping-cart"></i> Pesan Sekarang
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div id="vps-package" class="package-container">
+          <div class="packages">
+            <div class="package-card fade-in">
+              <h3 class="package-name"><i class="fas fa-cube"></i> KynasX VPS I</h3>
+              <p class="package-description" style="color: var(--text-light); margin-bottom: 1rem; font-size: 0.9rem;">VPS entry level dengan performa stabil untuk kebutuhan dasar</p>
+              <ul class="package-specs">
+                <li><i class="fas fa-memory"></i> 4GB RAM</li>
+                <li><i class="fas fa-hdd"></i> 25GB NVMe</li>
+                <li><i class="fas fa-microchip"></i> 2 CPU Core</li>
+                <li><i class="fas fa-satellite-dish"></i> 4 TB Bandwidth</li>
+                <li><i class="fas fa-shield-alt"></i> DDoS Protection</li>
+              </ul>
+              <p class="price">Rp 60.000<span class="price-period">/ bulan</span></p>
+              <button class="buy-btn" data-paket-id="vps-1">
+                <i class="fas fa-shopping-cart"></i> Pesan Sekarang
+              </button>
+            </div>
+
+            <div class="package-card fade-in" style="transition-delay: 0.1s">
+              <h3 class="package-name"><i class="fas fa-cube"></i> KynasX VPS II</h3>
+              <p class="package-description" style="color: var(--text-light); margin-bottom: 1rem; font-size: 0.9rem;">VPS mid-range cocok untuk bisnis dan project menengah</p>
+              <ul class="package-specs">
+                <li><i class="fas fa-memory"></i> 8GB RAM</li>
+                <li><i class="fas fa-hdd"></i> 50GB NVMe</li>
+                <li><i class="fas fa-microchip"></i> 4 CPU Core</li>
+                <li><i class="fas fa-satellite-dish"></i> 4 TB Bandwidth</li>
+                <li><i class="fas fa-shield-alt"></i> DDoS Protection</li>
+              </ul>
+              <p class="price">Rp 80.000<span class="price-period">/ bulan</span></p>
+              <button class="buy-btn" data-paket-id="vps-2">
+                <i class="fas fa-shopping-cart"></i> Pesan Sekarang
+              </button>
+            </div>
+
+            <div class="package-card featured fade-in" style="transition-delay: 0.2s">
+              <h3 class="package-name"><i class="fas fa-cube"></i> KynasX VPS III</h3>
+              <p class="package-description" style="color: var(--text-light); margin-bottom: 1rem; font-size: 0.9rem;">VPS high-performance untuk kebutuhan enterprise</p>
+              <ul class="package-specs">
+                <li><i class="fas fa-memory"></i> 16GB RAM</li>
+                <li><i class="fas fa-hdd"></i> 100GB NVMe</li>
+                <li><i class="fas fa-microchip"></i> 6 CPU Core</li>
+                <li><i class="fas fa-satellite-dish"></i> 8 TB Bandwidth</li>
+                <li><i class="fas fa-shield-alt"></i> DDoS Protection</li>
+              </ul>
+              <p class="price">Rp 150.000<span class="price-period">/ bulan</span></p>
+              <button class="buy-btn" data-paket-id="vps-3">
+                <i class="fas fa-shopping-cart"></i> Pesan Sekarang
+              </button>
+            </div>
+            
+            <div class="package-card featured fade-in" style="transition-delay: 0.2s">
+              <span class="package-badge">RECOMMEND</span>
+              <h3 class="package-name"><i class="fas fa-cube"></i> KynasX VPS IV</h3>
+              <p class="package-description" style="color: var(--text-light); margin-bottom: 1rem; font-size: 0.9rem;">VPS high-performance untuk kebutuhan enterprise</p>
+              <ul class="package-specs">
+                <li><i class="fas fa-memory"></i> 18GB RAM</li>
+                <li><i class="fas fa-hdd"></i> 250GB NVMe</li>
+                <li><i class="fas fa-microchip"></i> 4 CPU Core</li>
+                <li><i class="fas fa-satellite-dish"></i> 10 TB Bandwidth</li>
+                <li><i class="fas fa-shield-alt"></i> DDoS Protection</li>
+              </ul>
+              <p class="price">Rp 150.000<span class="price-period">/ bulan</span></p>
+              <button class="buy-btn" data-paket-id="vps-4">
+                <i class="fas fa-shopping-cart"></i> Pesan Sekarang
+              </button>
+            </div>
+            
+            <div class="package-card featured fade-in" style="transition-delay: 0.2s">
+              <span class="package-badge">TERBAIK</span>
+              <h3 class="package-name"><i class="fas fa-cube"></i> KynasX VPS V</h3>
+              <p class="package-description" style="color: var(--text-light); margin-bottom: 1rem; font-size: 0.9rem;">VPS high-performance untuk kebutuhan enterprise</p>
+              <ul class="package-specs">
+                <li><i class="fas fa-memory"></i> 26GB RAM</li>
+                <li><i class="fas fa-hdd"></i> 350GB NVMe</li>
+                <li><i class="fas fa-microchip"></i> 6 CPU Core</li>
+                <li><i class="fas fa-satellite-dish"></i> 10 TB Bandwidth</li>
+                <li><i class="fas fa-shield-alt"></i> DDoS Protection</li>
+              </ul>
+              <p class="price">Rp 210.000<span class="price-period">/ bulan</span></p>
+              <button class="buy-btn" data-paket-id="vps-5">
+                <i class="fas fa-shopping-cart"></i> Pesan Sekarang
+              </button>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq">
+      <div class="container">
+        <h2 class="section-title fade-in">Informasi & <span>Bantuan</span></h2>
+        
+        <div class="faq-container">
+
+          <div class="faq-item fade-in">
+            <button class="faq-question">
+              <span>Apa saja opsi pembayaran yang tersedia?</span>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="faq-answer">
+              <p>Kami mendukung kemudahan transaksi melalui QRIS All Payment. Anda bisa membayar menggunakan seluruh E-Wallet (Dana, OVO, GoPay, ShopeePay) serta Mobile Banking apa saja.</p>
+            </div>
+          </div>
+
+          <div class="faq-item fade-in">
+            <button class="faq-question">
+              <span>Berapa estimasi waktu aktivasi server?</span>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="faq-answer">
+              <p>Proses deploy kami sangat cepat. Server Anda akan berstatus <strong>Active</strong> dan siap digunakan hanya dalam hitungan menit setelah pembayaran terkonfirmasi oleh sistem.</p>
+            </div>
+          </div>
+
+          <div class="faq-item fade-in">
+            <button class="faq-question">
+              <span>Bagaimana kebijakan garansi layanan?</span>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="faq-answer">
+              <p>Produk digital yang sudah aktif (deployed) tidak dapat dikembalikan (non-refundable). Namun, KynasX memberikan <strong>Garansi</strong> jika sesuai dengan tos.</p>
+            </div>
+          </div>
+
+          <div class="faq-item fade-in">
+            <button class="faq-question">
+              <span>Apakah masa aktif bisa diperpanjang (Renewal)?</span>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="faq-answer">
+              <p>Tentu bisa. Anda dapat melakukan perpanjangan kapan saja sebelum tanggal jatuh tempo tanpa mengubah IP atau data server. Hubungi admin untuk proses renewal yang mudah.</p>
+            </div>
+          </div>
+
+          <div class="faq-item fade-in">
+            <button class="faq-question">
+              <span>Ke mana saya harus menghubungi support?</span>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="faq-answer">
+              <p>Tim teknis KynasX siap membantu Anda. Silakan hubungi kami melalui Telegram atau WhatsApp yang tersedia di menu kontak untuk respon tercepat.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <h2 class="footer-logo">kynasX<span>cloud</span></h2>
+      <p>Solusi hosting Panel Pterodactyl & VPS terbaik.</p>
+      <div class="social-links">
+        <a href="https://wa.me/6281235980179" target="_blank" aria-label="WhatsApp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+        <a href="https://t.me/kynastore21" target="_blank" aria-label="Telegram">
+          <i class="fab fa-telegram"></i>
+        </a>
+        <a href="https://instagram.com/_austin.kynaa" target="_blank" aria-label="Instagram">
+          <i class="fab fa-instagram"></i>
+        </a>
+      </div>
+      <p class="copyright">© 2025 Kynas Cloud. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <button class="back-to-top" id="backToTop" aria-label="Back to top">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+  <footer>
+     </footer>
+
+  <button class="back-to-top" id="backToTop" aria-label="Back to top">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <div class="modal-overlay" id="paymentModal">
+    <div class="modal-box">
+      <button class="modal-close" id="closeModal">&times;</button>
+      <h3 class="modal-title">Pilih Metode Pesan</h3>
+      <p class="modal-desc">Silakan pilih aplikasi untuk menghubungi kami:</p>
+      
+      <div class="modal-buttons">
+        <a href="#" id="linkWA" target="_blank" class="btn-contact btn-wa">
+          <i class="fab fa-whatsapp"></i> WhatsApp
+        </a>
+        <a href="#" id="linkTG" target="_blank" class="btn-contact btn-tg">
+          <i class="fab fa-telegram"></i> Telegram
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ... (Kode JavaScript Anda ada di sini) ...
+  </script>
+</body>
+</html>
+
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+      
+      // --- 1. LOGIC PRELOADER ANTI-MACET ---
+      const preloader = document.querySelector('.preloader');
+      
+      const hilangkanLoading = () => {
+        if (preloader) {
+          preloader.style.opacity = '0';
+          preloader.style.visibility = 'hidden';
+          // Hapus elemen dari HTML agar tidak menghalangi layar
+          setTimeout(() => {
+             preloader.remove(); 
+             document.body.style.overflow = 'auto';
+          }, 500);
+        }
+      };
+
+      // Hilang saat website selesai loading
+      window.addEventListener('load', hilangkanLoading);
+      
+      // PENGAMAN: Paksa hilang setelah 3 detik (biar tidak stuck)
+      setTimeout(hilangkanLoading, 3000);
+
+
+      // --- 2. LOGIC MODAL & TOMBOL PESAN ---
+      const packageStock = {
+        'panel-1': true, 'panel-2': true, 'panel-3': true,
+        'panel-4': true, 'panel-5': true, 'panel-6': true,
+        'vps-1': true, 'vps-2': true, 'vps-3': true, 'vps-4': true, 'vps-5': true,
+      };
+
+      const modal = document.getElementById('paymentModal');
+      const closeModal = document.getElementById('closeModal');
+      const linkWA = document.getElementById('linkWA');
+      const linkTG = document.getElementById('linkTG');
+
+      // Fungsi tutup modal
+      const hideModal = () => {
+        if(modal) {
+            modal.classList.remove('active');
+            setTimeout(() => { modal.style.display = 'none'; }, 300);
+        }
+      };
+
+      if(closeModal) closeModal.addEventListener('click', hideModal);
+      if(modal) modal.addEventListener('click', (e) => { if (e.target === modal) hideModal(); });
+
+      // Logic Tombol Beli
+      const buyButtons = document.querySelectorAll('.buy-btn[data-paket-id]');
+      buyButtons.forEach(button => {
+          const paketId = button.dataset.paketId;
+          
+          if (!packageStock[paketId]) {
+            button.classList.add('disabled');
+            button.innerHTML = '<i class="fas fa-times-circle"></i> Stok kosong';
+          } else {
+            button.addEventListener('click', (e) => {
+              e.preventDefault();
+              const card = button.closest('.package-card');
+              const packageName = card.querySelector('.package-name').textContent.trim();
+              const description = card.querySelector('.package-description').textContent;
+              const price = card.querySelector('.price').textContent;
+              
+              const message = `Halo Admin, saya ingin pesan:\n\n📦 *${packageName}*\n📝 ${description}\n💰 ${price}\n\nApakah masih tersedia?`;
+              
+              if(linkWA) linkWA.href = `https://wa.me/6281235980179?text=${encodeURIComponent(message)}`;
+              if(linkTG) linkTG.href = `https://t.me/kynastore21`; 
+
+              if(modal) {
+                  modal.style.display = 'flex';
+                  setTimeout(() => modal.classList.add('active'), 10);
+              }
+            });
+          }
+      });
+
+
+      // --- 3. FITUR WEBSITE LAINNYA ---
+      
+      // Navbar Scroll Effect
+      const navbar = document.getElementById('navbar');
+      window.addEventListener('scroll', () => {
+        if(navbar) navbar.classList.toggle('scrolled', window.scrollY > 50);
+      });
+
+      // Hamburger Menu
+      const hamburger = document.getElementById('hamburger');
+      const navMenu = document.getElementById('nav-menu');
+      const navLinks = document.querySelectorAll('.nav-link');
+
+      if(hamburger && navMenu) {
+          hamburger.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+            hamburger.innerHTML = navMenu.classList.contains('active') ? '<i class="fas fa-times"></i>' : '<i class="fas fa-bars"></i>';
+          });
+          
+          navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+              navMenu.classList.remove('active');
+              hamburger.innerHTML = '<i class="fas fa-bars"></i>';
+            });
+          });
+      }
+
+      // Dark Mode Toggle
+      const themeToggle = document.getElementById('theme-toggle');
+      if(themeToggle) {
+          const themeIcon = themeToggle.querySelector('i');
+          const applyTheme = (theme) => {
+            if (theme === 'light') {
+              document.body.classList.add('light-theme');
+              themeIcon.classList.replace('fa-moon', 'fa-sun');
+            } else {
+              document.body.classList.remove('light-theme');
+              themeIcon.classList.replace('fa-sun', 'fa-moon');
+            }
+          };
+          const savedTheme = localStorage.getItem('theme') || 'dark';
+          applyTheme(savedTheme);
+
+          themeToggle.addEventListener('click', () => {
+            let newTheme = document.body.classList.contains('light-theme') ? 'dark' : 'light';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+          });
+      }
+
+      // Tab Paket (Panel / VPS)
+      const toggleButtons = document.querySelectorAll('.toggle-btn');
+      const packageContainers = document.querySelectorAll('.package-container');
+
+      toggleButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          toggleButtons.forEach(btn => btn.classList.remove('active'));
+          packageContainers.forEach(container => container.classList.remove('active'));
+          button.classList.add('active');
+          const target = document.getElementById(`${button.dataset.package}-package`);
+          if(target) target.classList.add('active');
+        });
+      });
+
+      // FAQ Accordion
+      const faqItems = document.querySelectorAll('.faq-item');
+      faqItems.forEach(item => {
+        const question = item.querySelector('.faq-question');
+        if(question) {
+            question.addEventListener('click', () => {
+              const isActive = item.classList.contains('active');
+              faqItems.forEach(otherItem => otherItem.classList.remove('active'));
+              if (!isActive) item.classList.add('active');
+            });
+        }
+      });
+
+      // Back to Top
+      const backToTopButton = document.getElementById('backToTop');
+      if(backToTopButton) {
+          window.addEventListener('scroll', () => {
+            backToTopButton.classList.toggle('visible', window.scrollY > 300);
+          });
+          backToTopButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          });
+      }
+
+      // Fade In Animation
+      const fadeInElements = document.querySelectorAll('.fade-in');
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1 });
+      fadeInElements.forEach(el => observer.observe(el));
+    });
+  </script>
+</body>
+</html>
