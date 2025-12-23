@@ -1,1519 +1,1828 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kynas Cloud - Panel Pterodactyl & VPS</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-  <style>
-    :root {
-      --primary: #38bdf8;
-      --primary-dark: #0ea5e9;
-      --secondary: #8b5cf6;
-      --bg: #0b1224;
-      --card: #1e293b;
-      --text: #e2e8f0;
-      --text-light: #94a3b8;
-      --border: rgba(255, 255, 255, 0.12);
-      --ok: #10b981;
-      --err: #ef4444;
-      --warning: #f59e0b;
-      --radius: 16px;
-      --gap: 24px;
-      --pad: 32px;
-      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      line-height: 1.6;
-      overflow-x: hidden;
-    }
-
-    .preloader {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: var(--bg);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      transition: opacity 0.5s ease, visibility 0.5s ease;
-    }
-
-    .loader-text {
-      font-size: 3rem;
-      font-weight: 800;
-      display: flex;
-      gap: 5px;
-    }
-
-    .loader-Kynas {
-      color: var(--text); 
-    }
-
-    .loader-cloud {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent; 
-    }
-
-    .container {
-      width: min(100%, 1200px);
-      margin: 0 auto;
-      padding: 0 20px;
-    }
-
-    .navbar {
-      position: fixed;
-      top: 0;
-      width: 100%;
-      background: rgba(11, 18, 36, 0.95);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--border);
-      z-index: 1000;
-      padding: 1.2rem 0;
-      transition: var(--transition);
-    }
-
-    .navbar.scrolled {
-      padding: 1rem 0;
-      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
-    }
-
-    .nav-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .nav-logo {
-      font-size: 1.8rem;
-      font-weight: 800;
-      text-decoration: none;
-      color: var(--text);
-    }
-
-    .nav-logo span {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-
-    .nav-menu {
-      display: flex;
-      gap: 2rem;
-      list-style: none;
-    }
-
-    .nav-link {
-      color: var(--text-light);
-      text-decoration: none;
-      font-weight: 500;
-      transition: var(--transition);
-      position: relative;
-      padding: 5px 0;
-    }
-
-    .nav-link::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background: var(--primary);
-      transition: width 0.3s;
-    }
-
-    .nav-link:hover {
-      color: var(--text);
-    }
-
-    .nav-link:hover::after {
-      width: 100%;
-    }
-
-    .nav-controls {
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-    }
-
-    .nav-cta {
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      color: white;
-      padding: 10px 24px;
-      border-radius: var(--radius);
-      text-decoration: none;
-      font-weight: 600;
-      transition: var(--transition);
-      box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
-    }
-
-    .nav-cta:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(56, 189, 248, 0.4);
-    }
-
-    .theme-toggle {
-      background: var(--card);
-      border: none;
-      color: var(--text);
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .theme-toggle:hover {
-      background: var(--primary);
-      color: white;
-      transform: rotate(30deg);
-    }
-
-    .hamburger {
-      display: none;
-      background: none;
-      border: none;
-      color: var(--text);
-      font-size: 1.5rem;
-      cursor: pointer;
-    }
-
-    .hero {
-      padding: 180px 0 100px;
-      text-align: center;
-      background: linear-gradient(135deg, rgba(11, 18, 36, 0.9), rgba(30, 41, 59, 0.8));
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hero::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><path fill="%2338bdf8" opacity="0.05" d="M0,0L1000,0L1000,1000L0,1000Z"/></svg>');
-      background-size: cover;
-      z-index: -1;
-    }
-
-    .hero-title {
-      font-size: clamp(2.5rem, 5vw, 4rem);
-      font-weight: 800;
-      margin-bottom: 1.5rem;
-      line-height: 1.2;
-      background: linear-gradient(135deg, var(--text), var(--primary));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-
-    .hero-subtitle {
-      font-size: clamp(1rem, 2vw, 1.2rem);
-      color: var(--text-light);
-      max-width: 700px;
-      margin: 0 auto 2.5rem;
-    }
-
-    .hero-badges {
-      display: flex;
-      gap: 0.8rem;
-      margin-top: 2rem;
-      padding-bottom: 0.5rem;
-      overflow-x: auto;
-      justify-content: center;
-      scrollbar-width: thin;              
-    }
-
-    .hero-badges::-webkit-scrollbar {
-      height: 6px;
-    }
-    .hero-badges::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    .hero-badges::-webkit-scrollbar-thumb {
-      background: rgba(148, 163, 184, 0.6);
-      border-radius: 999px;
-    }
-
-    .badge {
-      background: rgba(56, 189, 248, 0.12);
-      border: 1px solid rgba(56, 189, 248, 0.35);
-      padding: 10px 16px;
-      border-radius: 50px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: var(--text);
-      white-space: nowrap;      
-      transition: var(--transition);
-    }
-
-    .badge:hover {
-      transform: translateY(-3px);
-      background: rgba(56, 189, 248, 0.18);
-      border-color: var(--primary);
-    }
-
-    .badge i {
-      color: var(--primary);
-    }
-
-    section {
-      padding: 80px 0;
-    }
-
-    .section-title {
-      font-size: clamp(2rem, 4vw, 3rem);
-      text-align: center;
-      margin-bottom: 1rem;
-      font-weight: 800;
-    }
-
-    .section-title span {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-
-    .section-subtitle {
-      text-align: center;
-      color: var(--text-light);
-      max-width: 700px;
-      margin: 0 auto 3rem;
-      font-size: 1.1rem;
-    }
-
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: var(--gap);
-      margin-top: 3rem;
-    }
-
-    .feature-item {
-      background: var(--card);
-      border-radius: var(--radius);
-      padding: var(--pad);
-      border: 1px solid var(--border);
-      transition: var(--transition);
-      text-align: center;
-    }
-
-    .feature-item:hover {
-      transform: translateY(-10px);
-      border-color: var(--primary);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-    }
-
-    .feature-icon {
-      width: 60px;
-      height: 60px;
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 1.5rem;
-      font-size: 1.5rem;
-      color: white;
-    }
-
-    .feature-item h3 {
-      font-size: 1.3rem;
-      margin-bottom: 1rem;
-      color: var(--text);
-    }
-
-    .feature-item p {
-      color: var(--text-light);
-      font-size: 0.95rem;
-    }
-
-    .package-toggle {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      margin: 3rem 0 4rem;
-      flex-wrap: wrap;
-    }
-
-    .toggle-btn {
-      background: var(--card);
-      border: 2px solid var(--border);
-      color: var(--text-light);
-      padding: 15px 30px;
-      border-radius: var(--radius);
-      font-weight: 600;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: var(--transition);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .toggle-btn.active {
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      color: white;
-      border-color: var(--primary);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(56, 189, 248, 0.3);
-    }
-
-    .toggle-btn:hover:not(.active) {
-      border-color: var(--primary);
-      color: var(--text);
-      transform: translateY(-2px);
-    }
-
-    .toggle-btn i {
-      font-size: 1.1rem;
-    }
-
-    .package-container {
-      display: none;
-      animation: fadeIn 0.5s ease;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .package-container.active {
-      display: block;
-    }
-
-    .packages {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: var(--gap);
-    }
-
-    .package-card {
-      background: var(--card);
-      border-radius: var(--radius);
-      padding: var(--pad);
-      border: 1px solid var(--border);
-      transition: var(--transition);
-      position: relative;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .package-card:hover {
-      transform: translateY(-10px);
-      border-color: var(--primary);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-    }
-
-    .package-card.featured {
-      border: 2px solid var(--primary);
-      transform: scale(1.05);
-    }
-
-    .package-card.featured:hover {
-      transform: scale(1.05) translateY(-10px);
-    }
-
-    .package-badge {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      color: white;
-      padding: 5px 15px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-
-    .package-name {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .package-name i {
-      color: var(--primary);
-      font-size: 1.3rem;
-    }
-
-    .package-specs {
-      list-style: none;
-      margin-bottom: 1.5rem;
-      flex-grow: 1;
-    }
-
-    .package-specs li {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .package-specs li:last-child {
-      border-bottom: none;
-    }
-
-    .package-specs i {
-      color: var(--primary);
-      width: 20px;
-    }
-
-    .price {
-      font-size: 2.5rem;
-      font-weight: 800;
-      color: var(--primary);
-      margin-bottom: 1.5rem;
-    }
-
-    .price-period {
-      font-size: 1rem;
-      color: var(--text-light);
-      font-weight: 400;
-    }
-
-    .buy-btn {
-      display: block;
-      width: 100%;
-      text-align: center;
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      color: white;
-      padding: 15px;
-      border-radius: var(--radius);
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 1rem;
-      border: none;
-      cursor: pointer;
-      transition: var(--transition);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-
-    .buy-btn:hover:not(.disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(56, 189, 248, 0.4);
-    }
-
-    .buy-btn.disabled {
-      background: var(--err);
-      cursor: not-allowed;
-      opacity: 0.7;
-      transform: none !important;
-    }
-
-    .buy-btn.disabled i {
-      color: white !important;
-    }
-
-    .faq-container {
-      max-width: 800px;
-      margin: 3rem auto 0;
-    }
-
-    .faq-item {
-      background: var(--card);
-      border-radius: var(--radius);
-      margin-bottom: 1rem;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      transition: var(--transition);
-    }
-
-    .faq-item:hover {
-      border-color: var(--primary);
-    }
-
-    .faq-question {
-      width: 100%;
-      background: none;
-      border: none;
-      padding: 1.5rem;
-      text-align: left;
-      color: var(--text);
-      font-size: 1.1rem;
-      font-weight: 600;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-    }
-
-    .faq-question i {
-      transition: transform 0.3s;
-      color: var(--primary);
-    }
-
-    .faq-item.active .faq-question i {
-      transform: rotate(180deg);
-    }
-
-    .faq-answer {
-      padding: 0 1.5rem;
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease;
-    }
-
-    .faq-item.active .faq-answer {
-      padding-bottom: 1.5rem;
-      max-height: 500px;
-    }
-
-    .faq-answer p {
-      color: var(--text-light);
-      line-height: 1.8;
-    }
-
-    .cta-section {
-      text-align: center;
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      border-radius: var(--radius);
-      padding: 4rem;
-      margin: 4rem 0;
-    }
-
-    .cta-title {
-      font-size: 2.5rem;
-      font-weight: 800;
-      margin-bottom: 1rem;
-      color: white;
-    }
-
-    .cta-subtitle {
-      font-size: 1.2rem;
-      color: rgba(255, 255, 255, 0.9);
-      max-width: 700px;
-      margin: 0 auto;
-    }
-
-    footer {
-      background: rgba(0, 0, 0, 0.3);
-      padding: 4rem 0 2rem;
-      text-align: center;
-      border-top: 1px solid var(--border);
-    }
-
-    .footer-logo {
-      font-size: 2.5rem;
-      font-weight: 800;
-      margin-bottom: 1rem;
-      color: var(--text);
-    }
-
-    .footer-logo span {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-
-    footer p {
-      color: var(--text-light);
-      margin-bottom: 2rem;
-      max-width: 500px;
-      margin: 0 auto 2rem;
-    }
-
-    .social-links {
-      display: flex;
-      justify-content: center;
-      gap: 1.5rem;
-      margin: 2rem 0 3rem;
-    }
-
-    .social-links a {
-      width: 50px;
-      height: 50px;
-      background: var(--card);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text);
-      text-decoration: none;
-      font-size: 1.2rem;
-      transition: var(--transition);
-      border: 1px solid var(--border);
-    }
-
-    .social-links a:hover {
-      background: var(--primary);
-      color: white;
-      transform: translateY(-5px);
-      border-color: var(--primary);
-    }
-
-    .copyright {
-      color: var(--text-light);
-      font-size: 0.9rem;
-      margin-top: 2rem;
-    }
-
-    .back-to-top {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      width: 50px;
-      height: 50px;
-      background: var(--primary);
-      color: white;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-decoration: none;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: var(--transition);
-      z-index: 100;
-      border: none;
-      cursor: pointer;
-    }
-
-    .back-to-top.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .back-to-top:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 20px rgba(56, 189, 248, 0.4);
-    }
-
-    .fade-in {
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.6s ease, transform 0.6s ease;
-    }
-
-    .fade-in.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .theme-toggle {
-      display: none !important;
-    }
-
-    @media (max-width: 1024px) {
-      .packages {
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      }
-    }
-
-    @media (max-width: 768px) {
-      .hamburger {
-        display: block;
-      }
-
-      .nav-menu {
-        position: fixed;
-        top: 80px;
-        left: 0;
-        width: 100%;
-        background: var(--bg);
-        flex-direction: column;
-        padding: 2rem;
-        gap: 1rem;
-        transform: translateY(-100%);
-        opacity: 0;
-        visibility: hidden;
-        transition: var(--transition);
-        border-bottom: 1px solid var(--border);
-        z-index: 999;
-      }
-
-      .nav-menu.active {
-        transform: translateY(0);
-        opacity: 1;
-        visibility: visible;
-      }
-
-      .nav-cta {
-        display: none;
-      }
-
-      .hero {
-        padding: 150px 0 80px;
-      }
-
-      .hero-badges {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .package-toggle {
-        flex-direction: column;
-      }
-
-      .toggle-btn {
-        width: 100%;
-        justify-content: center;
-      }
-
-      .package-card.featured {
-        transform: none;
-      }
-
-      .package-card.featured:hover {
-        transform: translateY(-10px);
-      }
-
-      .cta-section {
-        padding: 3rem 2rem;
-      }
-
-      .cta-title {
-        font-size: 2rem;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .packages {
-        grid-template-columns: 1fr;
-      }
-
-      .feature-item {
-        padding: 1.5rem;
-      }
-
-      .hero-title {
-        font-size: 2rem;
-      }
-
-      .section-title {
-        font-size: 1.8rem;
-      }
-
-      .price {
-        font-size: 2rem;
-      }
-    }
-        /* --- CSS UNTUK MODAL POPUP --- */
-    .modal-overlay {
-      display: none; /* Hidden by default */
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(5px);
-      z-index: 10000;
-      justify-content: center;
-      align-items: center;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .modal-overlay.active {
-      display: flex;
-      opacity: 1;
-    }
-
-    .modal-box {
-      background: var(--card);
-      border: 1px solid var(--border);
-      padding: 30px;
-      border-radius: var(--radius);
-      width: 90%;
-      max-width: 400px;
-      text-align: center;
-      position: relative;
-      transform: translateY(20px);
-      transition: transform 0.3s ease;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-    }
-
-    .modal-overlay.active .modal-box {
-      transform: translateY(0);
-    }
-
-    .modal-close {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      background: none;
-      border: none;
-      color: var(--text-light);
-      font-size: 1.5rem;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .modal-close:hover {
-      color: var(--err);
-    }
-
-    .modal-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-bottom: 10px;
-      color: var(--text);
-    }
-
-    .modal-desc {
-      color: var(--text-light);
-      margin-bottom: 25px;
-      font-size: 0.95rem;
-    }
-
-    .modal-buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-
-    .btn-contact {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      padding: 12px;
-      border-radius: var(--radius);
-      text-decoration: none;
-      font-weight: 600;
-      color: white;
-      transition: var(--transition);
-      border: none;
-      cursor: pointer;
-      font-size: 1rem;
-    }
-
-    .btn-wa {
-      background: #25D366;
-    }
-    .btn-wa:hover {
-      background: #1fae53;
-      transform: translateY(-2px);
-    }
-
-    .btn-tg {
-      background: #0088cc;
-    }
-    .btn-tg:hover {
-      background: #0077b5;
-      transform: translateY(-2px);
-    }
-  </style>
-</head>
-<body>
-  <div class="preloader">
-    <div class="loader-text">
-      <span class="loader-Kynas">kynasX</span><span class="loader-cloud">cloud</span>
-    </div>
-  </div>
-
-  <nav class="navbar" id="navbar">
-    <div class="container">
-      <div class="nav-container">
-        <a href="#" class="nav-logo">kynasX<span>cloud</span></a>
-        
-        <ul class="nav-menu" id="nav-menu">
-          <li><a href="#home" class="nav-link">Beranda</a></li>
-          <li><a href="#features" class="nav-link">Fitur</a></li>
-          <li><a href="#pricing" class="nav-link">Paket</a></li>
-          <li><a href="#faq" class="nav-link">FAQ</a></li>
-          <li><a href="https://t.me/kynasXinfo" class="nav-link">Channel</a></li>
-        </ul>
-        
-        <div class="nav-controls">
-          <a href="#pricing" class="nav-cta">Mulai Sekarang</a>
-          <button class="theme-toggle" id="theme-toggle">
-            <i class="fas fa-moon"></i>
-          </button>
-          <button class="hamburger" id="hamburger">
-            <i class="fas fa-bars"></i>
-          </button>
-        </div>
-      </div>
-    </div>
-  </nav>
-
-  <header class="hero" id="home">
-    <div class="container">
-      <h1 class="hero-title fade-in">Juaranya Hosting Pterodactyl & VPS terbaik</h1>
-      <p class="hero-subtitle fade-in" style="transition-delay: 0.1s;">KynasX menghadirkan solusi server dengan performa tangguh dan responsivitas tinggi. Pengalaman hosting terbaik dengan dukungan teknis yang bisa Anda andalkan 24/7.</p>
-    </div>
-  </header>
-
-  <main>
-    <section id="features">
-      <div class="container">
-        <h2 class="section-title fade-in">Mengapa Memilih <span>kynasXcloud?</span></h2>
-        <p class="section-subtitle fade-in">Kami menghadirkan standar baru dalam dunia hosting dengan infrastruktur yang stabil dan fitur yang memanjakan pengguna.</p>
-        
-        <div class="features-grid">
-          <div class="feature-item fade-in">
-            <div class="feature-icon"><i class="fas fa-tachometer-alt"></i></div>
-            <h3>Akselerasi Maksimal</h3>
-            <p>Didukung penyimpanan NVMe Enterprise untuk proses baca-tulis data super kencang tanpa hambatan.</p>
-          </div>
-          
-          <div class="feature-item fade-in" style="transition-delay: 0.2s;">
-            <div class="feature-icon"><i class="fas fa-headset"></i></div>
-            <h3>Support Responsif</h3>
-            <p>Tim teknis kami selalu siaga memberikan solusi cepat untuk setiap kendala server Anda.</p>
-          </div>
-          
-          <div class="feature-item fade-in" style="transition-delay: 0.3s;">
-            <div class="feature-icon"><i class="fas fa-cogs"></i></div>
-            <h3>Kontrol Penuh</h3>
-            <p>Kelola resource dan konfigurasi server dengan leluasa melalui panel Pterodactyl yang intuitif.</p>
-          </div>
-          
-          <div class="feature-item fade-in" style="transition-delay: 0.4s;">
-            <div class="feature-icon"><i class="fas fa-network-wired"></i></div>
-            <h3>Jaringan Low Latency</h3>
-            <p>Jalur koneksi prioritas yang menjamin ping rendah, ideal untuk gaming dan aplikasi berat.</p>
-          </div>
-          
-          <div class="feature-item fade-in" style="transition-delay: 0.5s;">
-            <div class="feature-icon"><i class="fas fa-bolt"></i></div>
-            <h3>Stabilitas Terjaga</h3>
-            <p>Jaminan uptime tinggi dengan infrastruktur tangguh yang menjaga server tetap aktif 24/7.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="pricing">
-        <div class="container">
-        <h2 class="section-title fade-in">Spesifikasi Server <span>kynasXcloud</span></h2>
-         <p class="section-subtitle fade-in">Tersedia berbagai pilihan konfigurasi yang dirancang khusus untuk memaksimalkan efisiensi dan stabilitas layanan Anda.</p>
-
-        <div class="package-toggle fade-in">
-          <button class="toggle-btn active" data-package="panel">
-            <i class="fas fa-server"></i> Panel Pterodactyl
-          </button>
-          <button class="toggle-btn" data-package="vps">
-            <i class="fas fa-cube"></i> Virtual Private Server
-          </button>
-        </div>
-        
-        <div id="panel-package" class="package-container active">
-          <div class="packages">
-            <div class="package-card fade-in">
-              <h3 class="package-name"><i class="fas fa-server"></i> KynasX I</h3>
-              <p class="package-description" style="color: var(--text-light); margin-bottom: 1rem; font-size: 0.9rem;">Cocok untuk bot menengah dengan traffic sedang</p>
-              <ul class="package-specs">
-                <li><i class="fas fa-memory"></i> 2GB RAM</li>
-                <li><i class="fas fa-hdd"></i> 5GB Disk Space</li>
-                <li><i class="fas fa-microchip"></i> 150% CPU</li>
-                <li><i class="fas fa-shield-alt"></i> DDoS Protection</li>
-              </ul>
-              <p class="price">Rp 5.000<span class="price-period">/ bulan</span></p>
-              <button class="buy-btn" data-paket-id="panel-1">
-              <i class="fas fa-shopping-cart"></i> Pesan Sekarang
-              </button>
-
-            </div>
-
-            <div class="package-card featured fade-in" style="transition-delay: 0.1s">
-              <span class="package-badge">POPULAR</span>
-              <h3 class="package-name"><i class="fas fa-server"></i> KynasX II</h3>
-              <p class="package-description" style="color: var(--text-light); margin-bottom: 1rem; font-size: 0.9rem;">Pilihan tepat untuk bot dengan performa optimal</p>
-              <ul class="package-specs">
-                <li><i class="fas fa-memory"></i> 3GB RAM</li>
-                <li><i class="fas fa-hdd"></i> 7GB Disk Space</li>
-                <li><i class="fas fa-microchip"></i> 200% CPU</li>
-                <li><i class="fas fa-shield-alt"></i> DDoS Protection</li>
-              </ul>
-              <p class="price">Rp 6.000<span class="price-period">/ bulan</span></p>
-              <button class="buy-btn" data-paket-id="panel-2">
-                <i class="fas fa-shopping-cart"></i> Pesan Sekarang
-              </button>
-            </div>
-
-            <div class="package-card fade-in" style="transition-delay: 0.2s">
-              <h3 class="package-name"><i class="fas fa-server"></i> KynasX III</h3>
-              <p class="package-description" style="color: var(--text-light); margin-bottom: 1rem; font-size: 0.9rem;">Untuk kebutuhan yang membutuhkan resource lebih</p>
-              <ul class="package-specs">
-                <li><i class="fas fa-memory"></i> 5GB RAM</li>
-                <li><i class="fas fa-hdd"></i> 10GB Disk Space</li>
-                <li><i class="fas fa-microchip"></i> 250% CPU</li>
-                <li><i class="fas fa-shield-alt"></i> DDoS Protection</li>
-              </ul>
-              <p class="price">Rp 8.000<span class="price-period">/ bulan</span></p>
-              <button class="buy-btn" data-paket-id="panel-3">
-                <i class="fas fa-shopping-cart"></i> Pesan Sekarang
-              </button>
-            </div>
-
-            <div class="package-card fade-in" style="transition-delay: 0.3s">
-              <h3 class="package-name"><i class="fas fa-server"></i> KynasX IV</h3>
-              <p class="package-description" style="color: var(--text-light); margin-bottom: 1rem; font-size: 0.9rem;">Paket power untuk projects yang membutuhkan performa tinggi</p>
-              <ul class="package-specs">
-                <li><i class="fas fa-memory"></i> 7GB RAM</li>
-                <li><i class="fas fa-hdd"></i> 13GB Disk Space</li>
-                <li><i class="fas fa-microchip"></i> 300% CPU</li>
-                <li><i class="fas fa-shield-alt"></i> DDoS Protection</li>
-              </ul>
-              <p class="price">Rp 10.000<span class="price-period">/ bulan</span></p>
-              <button class="buy-btn" data-paket-id="panel-4">
-                <i class="fas fa-shopping-cart"></i> Pesan Sekarang
-              </button>
-            </div>
-
-            <div class="package-card fade-in" style="transition-delay: 0.4s">
-              <h3 class="package-name"><i class="fas fa-server"></i> KynasX V</h3>
-              <p class="package-description" style="color: var(--text-light); margin-bottom: 1rem; font-size: 0.9rem;">Ideal untuk server dengan traffic padat</p>
-              <ul class="package-specs">
-                <li><i class="fas fa-memory"></i> 10GB RAM</li>
-                <li><i class="fas fa-hdd"></i> 15GB Disk Space</li>
-                <li><i class="fas fa-microchip"></i> 350% CPU</li>
-                <li><i class="fas fa-shield-alt"></i> DDoS Protection</li>
-              </ul>
-              <p class="price">Rp 15.000<span class="price-period">/ bulan</span></p>
-              <button class="buy-btn" data-paket-id="panel-5">
-                <i class="fas fa-shopping-cart"></i> Pesan Sekarang
-              </button>
-            </div>
-
-            <div class="package-card fade-in" style="transition-delay: 0.5s">
-              <h3 class="package-name"><i class="fas fa-server"></i> KynasX VI</h3>
-              <p class="package-description" style="color: var(--text-light); margin-bottom: 1rem; font-size: 0.9rem;">Solusi enterprise dengan resource maksimal</p>
-              <ul class="package-specs">
-                <li><i class="fas fa-memory"></i> 15GB RAM</li>
-                <li><i class="fas fa-hdd"></i> 20GB Disk Space</li>
-                <li><i class="fas fa-microchip"></i> 400% CPU</li>
-                <li><i class="fas fa-shield-alt"></i> DDoS Protection</li>
-              </ul>
-              <p class="price">Rp 20.000<span class="price-period">/ bulan</span></p>
-              <button class="buy-btn" data-paket-id="panel-6">
-                <i class="fas fa-shopping-cart"></i> Pesan Sekarang
-              </button>
-            </div>
-          </div>
-        </div>
-        
-        <div id="vps-package" class="package-container">
-          <div class="packages">
-            <div class="package-card fade-in">
-              <h3 class="package-name"><i class="fas fa-cube"></i> KynasX VPS I</h3>
-              <p class="package-description" style="color: var(--text-light); margin-bottom: 1rem; font-size: 0.9rem;">VPS entry level dengan performa stabil untuk kebutuhan dasar</p>
-              <ul class="package-specs">
-                <li><i class="fas fa-memory"></i> 4GB RAM</li>
-                <li><i class="fas fa-hdd"></i> 25GB NVMe</li>
-                <li><i class="fas fa-microchip"></i> 2 CPU Core</li>
-                <li><i class="fas fa-satellite-dish"></i> 4 TB Bandwidth</li>
-                <li><i class="fas fa-shield-alt"></i> DDoS Protection</li>
-              </ul>
-              <p class="price">Rp 60.000<span class="price-period">/ bulan</span></p>
-              <button class="buy-btn" data-paket-id="vps-1">
-                <i class="fas fa-shopping-cart"></i> Pesan Sekarang
-              </button>
-            </div>
-
-            <div class="package-card fade-in" style="transition-delay: 0.1s">
-              <h3 class="package-name"><i class="fas fa-cube"></i> KynasX VPS II</h3>
-              <p class="package-description" style="color: var(--text-light); margin-bottom: 1rem; font-size: 0.9rem;">VPS mid-range cocok untuk bisnis dan project menengah</p>
-              <ul class="package-specs">
-                <li><i class="fas fa-memory"></i> 8GB RAM</li>
-                <li><i class="fas fa-hdd"></i> 50GB NVMe</li>
-                <li><i class="fas fa-microchip"></i> 4 CPU Core</li>
-                <li><i class="fas fa-satellite-dish"></i> 4 TB Bandwidth</li>
-                <li><i class="fas fa-shield-alt"></i> DDoS Protection</li>
-              </ul>
-              <p class="price">Rp 80.000<span class="price-period">/ bulan</span></p>
-              <button class="buy-btn" data-paket-id="vps-2">
-                <i class="fas fa-shopping-cart"></i> Pesan Sekarang
-              </button>
-            </div>
-
-            <div class="package-card featured fade-in" style="transition-delay: 0.2s">
-              <h3 class="package-name"><i class="fas fa-cube"></i> KynasX VPS III</h3>
-              <p class="package-description" style="color: var(--text-light); margin-bottom: 1rem; font-size: 0.9rem;">VPS high-performance untuk kebutuhan enterprise</p>
-              <ul class="package-specs">
-                <li><i class="fas fa-memory"></i> 16GB RAM</li>
-                <li><i class="fas fa-hdd"></i> 100GB NVMe</li>
-                <li><i class="fas fa-microchip"></i> 6 CPU Core</li>
-                <li><i class="fas fa-satellite-dish"></i> 8 TB Bandwidth</li>
-                <li><i class="fas fa-shield-alt"></i> DDoS Protection</li>
-              </ul>
-              <p class="price">Rp 150.000<span class="price-period">/ bulan</span></p>
-              <button class="buy-btn" data-paket-id="vps-3">
-                <i class="fas fa-shopping-cart"></i> Pesan Sekarang
-              </button>
-            </div>
-            
-            <div class="package-card featured fade-in" style="transition-delay: 0.2s">
-              <span class="package-badge">RECOMMEND</span>
-              <h3 class="package-name"><i class="fas fa-cube"></i> KynasX VPS IV</h3>
-              <p class="package-description" style="color: var(--text-light); margin-bottom: 1rem; font-size: 0.9rem;">VPS high-performance untuk kebutuhan enterprise</p>
-              <ul class="package-specs">
-                <li><i class="fas fa-memory"></i> 18GB RAM</li>
-                <li><i class="fas fa-hdd"></i> 250GB NVMe</li>
-                <li><i class="fas fa-microchip"></i> 4 CPU Core</li>
-                <li><i class="fas fa-satellite-dish"></i> 10 TB Bandwidth</li>
-                <li><i class="fas fa-shield-alt"></i> DDoS Protection</li>
-              </ul>
-              <p class="price">Rp 170.000<span class="price-period">/ bulan</span></p>
-              <button class="buy-btn" data-paket-id="vps-4">
-                <i class="fas fa-shopping-cart"></i> Pesan Sekarang
-              </button>
-            </div>
-            
-            <div class="package-card featured fade-in" style="transition-delay: 0.2s">
-              <span class="package-badge">TERBAIK</span>
-              <h3 class="package-name"><i class="fas fa-cube"></i> KynasX VPS V</h3>
-              <p class="package-description" style="color: var(--text-light); margin-bottom: 1rem; font-size: 0.9rem;">VPS high-performance untuk kebutuhan enterprise</p>
-              <ul class="package-specs">
-                <li><i class="fas fa-memory"></i> 26GB RAM</li>
-                <li><i class="fas fa-hdd"></i> 350GB NVMe</li>
-                <li><i class="fas fa-microchip"></i> 6 CPU Core</li>
-                <li><i class="fas fa-satellite-dish"></i> 10 TB Bandwidth</li>
-                <li><i class="fas fa-shield-alt"></i> DDoS Protection</li>
-              </ul>
-              <p class="price">Rp 210.000<span class="price-period">/ bulan</span></p>
-              <button class="buy-btn" data-paket-id="vps-5">
-                <i class="fas fa-shopping-cart"></i> Pesan Sekarang
-              </button>
-            </div>
-            
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="faq">
-      <div class="container">
-        <h2 class="section-title fade-in">Informasi & <span>Bantuan</span></h2>
-        
-        <div class="faq-container">
-
-          <div class="faq-item fade-in">
-            <button class="faq-question">
-              <span>Apa saja opsi pembayaran yang tersedia?</span>
-              <i class="fas fa-chevron-down"></i>
-            </button>
-            <div class="faq-answer">
-              <p>Kami mendukung kemudahan transaksi melalui QRIS All Payment. Anda bisa membayar menggunakan seluruh E-Wallet (Dana, OVO, GoPay, ShopeePay) serta Mobile Banking apa saja.</p>
-            </div>
-          </div>
-
-          <div class="faq-item fade-in">
-            <button class="faq-question">
-              <span>Berapa estimasi waktu aktivasi server?</span>
-              <i class="fas fa-chevron-down"></i>
-            </button>
-            <div class="faq-answer">
-              <p>Proses deploy kami sangat cepat. Server Anda akan berstatus <strong>Active</strong> dan siap digunakan hanya dalam hitungan menit setelah pembayaran terkonfirmasi oleh sistem.</p>
-            </div>
-          </div>
-
-          <div class="faq-item fade-in">
-            <button class="faq-question">
-              <span>Bagaimana kebijakan garansi layanan?</span>
-              <i class="fas fa-chevron-down"></i>
-            </button>
-            <div class="faq-answer">
-              <p>Produk digital yang sudah aktif (deployed) tidak dapat dikembalikan (non-refundable). Namun, KynasX memberikan <strong>Garansi</strong> jika sesuai dengan tos.</p>
-            </div>
-          </div>
-
-          <div class="faq-item fade-in">
-            <button class="faq-question">
-              <span>Apakah masa aktif bisa diperpanjang (Renewal)?</span>
-              <i class="fas fa-chevron-down"></i>
-            </button>
-            <div class="faq-answer">
-              <p>Tentu bisa. Anda dapat melakukan perpanjangan kapan saja sebelum tanggal jatuh tempo tanpa mengubah IP atau data server. Hubungi admin untuk proses renewal yang mudah.</p>
-            </div>
-          </div>
-
-          <div class="faq-item fade-in">
-            <button class="faq-question">
-              <span>Ke mana saya harus menghubungi support?</span>
-              <i class="fas fa-chevron-down"></i>
-            </button>
-            <div class="faq-answer">
-              <p>Tim teknis KynasX siap membantu Anda. Silakan hubungi kami melalui Telegram atau WhatsApp yang tersedia di menu kontak untuk respon tercepat.</p>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    <div class="container">
-      <h2 class="footer-logo">kynasX<span>cloud</span></h2>
-      <p>Solusi hosting Panel Pterodactyl & VPS terbaik.</p>
-      <div class="social-links">
-        <a href="https://wa.me/6281235980179" target="_blank" aria-label="WhatsApp">
-          <i class="fab fa-whatsapp"></i>
-        </a>
-        <a href="https://t.me/kynastore21" target="_blank" aria-label="Telegram">
-          <i class="fab fa-telegram"></i>
-        </a>
-        <a href="https://instagram.com/_austin.kynaa" target="_blank" aria-label="Instagram">
-          <i class="fab fa-instagram"></i>
-        </a>
-      </div>
-      <p class="copyright">© 2025 Kynas Cloud. All rights reserved.</p>
-    </div>
-  </footer>
-
-  <button class="back-to-top" id="backToTop" aria-label="Back to top">
-    <i class="fas fa-arrow-up"></i>
-  </button>
-  <footer>
-     </footer>
-
-  <button class="back-to-top" id="backToTop" aria-label="Back to top">
-    <i class="fas fa-arrow-up"></i>
-  </button>
-
-  <div class="modal-overlay" id="paymentModal">
-    <div class="modal-box">
-      <button class="modal-close" id="closeModal">&times;</button>
-      <h3 class="modal-title">Pilih Metode Pesan</h3>
-      <p class="modal-desc">Silakan pilih aplikasi untuk menghubungi kami:</p>
-      
-      <div class="modal-buttons">
-        <a href="#" id="linkWA" target="_blank" class="btn-contact btn-wa">
-          <i class="fab fa-whatsapp"></i> WhatsApp
-        </a>
-        <a href="#" id="linkTG" target="_blank" class="btn-contact btn-tg">
-          <i class="fab fa-telegram"></i> Telegram
-        </a>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // ... (Kode JavaScript Anda ada di sini) ...
-  </script>
-</body>
-</html>
-
-  <script>
-document.addEventListener('DOMContentLoaded', () => {
-      
-      // --- 1. LOGIC PRELOADER ANTI-MACET ---
-      const preloader = document.querySelector('.preloader');
-      
-      const hilangkanLoading = () => {
-        if (preloader) {
-          preloader.style.opacity = '0';
-          preloader.style.visibility = 'hidden';
-          // Hapus elemen dari HTML agar tidak menghalangi layar
-          setTimeout(() => {
-             preloader.remove(); 
-             document.body.style.overflow = 'auto';
-          }, 500);
-        }
-      };
-
-      // Hilang saat website selesai loading
-      window.addEventListener('load', hilangkanLoading);
-      
-      // PENGAMAN: Paksa hilang setelah 3 detik (biar tidak stuck)
-      setTimeout(hilangkanLoading, 3000);
-
-
-      // --- 2. LOGIC MODAL & TOMBOL PESAN ---
-      const packageStock = {
-        'panel-1': true, 'panel-2': true, 'panel-3': true,
-        'panel-4': true, 'panel-5': true, 'panel-6': true,
-        'vps-1': true, 'vps-2': true, 'vps-3': true, 'vps-4': true, 'vps-5': true,
-      };
-
-      const modal = document.getElementById('paymentModal');
-      const closeModal = document.getElementById('closeModal');
-      const linkWA = document.getElementById('linkWA');
-      const linkTG = document.getElementById('linkTG');
-
-      // Fungsi tutup modal
-      const hideModal = () => {
-        if(modal) {
-            modal.classList.remove('active');
-            setTimeout(() => { modal.style.display = 'none'; }, 300);
-        }
-      };
-
-      if(closeModal) closeModal.addEventListener('click', hideModal);
-      if(modal) modal.addEventListener('click', (e) => { if (e.target === modal) hideModal(); });
-
-      // Logic Tombol Beli
-      const buyButtons = document.querySelectorAll('.buy-btn[data-paket-id]');
-      buyButtons.forEach(button => {
-          const paketId = button.dataset.paketId;
-          
-          if (!packageStock[paketId]) {
-            button.classList.add('disabled');
-            button.innerHTML = '<i class="fas fa-times-circle"></i> Stok kosong';
-          } else {
-            button.addEventListener('click', (e) => {
-              e.preventDefault();
-              const card = button.closest('.package-card');
-              const packageName = card.querySelector('.package-name').textContent.trim();
-              const description = card.querySelector('.package-description').textContent;
-              const price = card.querySelector('.price').textContent;
-              
-              const message = `Halo Admin, saya ingin pesan:\n\n📦 *${packageName}*\n📝 ${description}\n💰 ${price}\n\nApakah masih tersedia?`;
-              
-              if(linkWA) linkWA.href = `https://wa.me/6281235980179?text=${encodeURIComponent(message)}`;
-              if(linkTG) linkTG.href = `https://t.me/kynastore21`; 
-
-              if(modal) {
-                  modal.style.display = 'flex';
-                  setTimeout(() => modal.classList.add('active'), 10);
-              }
-            });
-          }
-      });
-
-
-      // --- 3. FITUR WEBSITE LAINNYA ---
-      
-      // Navbar Scroll Effect
-      const navbar = document.getElementById('navbar');
-      window.addEventListener('scroll', () => {
-        if(navbar) navbar.classList.toggle('scrolled', window.scrollY > 50);
-      });
-
-      // Hamburger Menu
-      const hamburger = document.getElementById('hamburger');
-      const navMenu = document.getElementById('nav-menu');
-      const navLinks = document.querySelectorAll('.nav-link');
-
-      if(hamburger && navMenu) {
-          hamburger.addEventListener('click', () => {
-            navMenu.classList.toggle('active');
-            hamburger.innerHTML = navMenu.classList.contains('active') ? '<i class="fas fa-times"></i>' : '<i class="fas fa-bars"></i>';
-          });
-          
-          navLinks.forEach(link => {
-            link.addEventListener('click', () => {
-              navMenu.classList.remove('active');
-              hamburger.innerHTML = '<i class="fas fa-bars"></i>';
-            });
-          });
-      }
-
-      // Dark Mode Toggle
-      const themeToggle = document.getElementById('theme-toggle');
-      if(themeToggle) {
-          const themeIcon = themeToggle.querySelector('i');
-          const applyTheme = (theme) => {
-            if (theme === 'light') {
-              document.body.classList.add('light-theme');
-              themeIcon.classList.replace('fa-moon', 'fa-sun');
-            } else {
-              document.body.classList.remove('light-theme');
-              themeIcon.classList.replace('fa-sun', 'fa-moon');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>kynas market | Premium Digital Services</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { 
+                extend: { 
+                    colors: { 
+                        utama: '#f43f5e', 
+                        sekunder: '#3b82f6',
+                        gelap: '#0f172a', 
+                        kartuGelap: '#1e293b',
+                        hijau: '#10b981',
+                        ungu: '#8b5cf6',
+                        kuning: '#f59e0b',
+                        cyan: '#06b6d4'
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s ease-in-out infinite',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'fade-in': 'fadeIn 0.6s ease-out',
+                        'bounce-slow': 'bounce 2s infinite',
+                    },
+                    boxShadow: {
+                        'neumorphism': '20px 20px 60px #0d1522, -20px -20px 60px #111b32',
+                        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+                        'card-hover': '0 20px 40px -15px rgba(244, 63, 94, 0.3)',
+                    }
+                } 
             }
-          };
-          const savedTheme = localStorage.getItem('theme') || 'dark';
-          applyTheme(savedTheme);
+        }
+    </script>
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Modern Sidebar */
+        .sidebar {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        
+        .dark .sidebar {
+            background: rgba(15, 23, 42, 0.95);
+        }
+        
+        .active-icon { 
+            background: linear-gradient(135deg, #f43f5e, #8b5cf6) !important;
+            transform: scale(1.1);
+            box-shadow: 0 10px 25px -5px rgba(244, 63, 94, 0.5);
+        }
+        
+        .active-text { 
+            color: #f43f5e !important; 
+            font-weight: 800 !important;
+            background: linear-gradient(135deg, #f43f5e, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .product-selected { 
+            border-color: #f43f5e !important;
+            background: linear-gradient(135deg, rgba(244, 63, 94, 0.08), rgba(59, 130, 246, 0.05));
+            box-shadow: 0 10px 30px -10px rgba(244, 63, 94, 0.25);
+            transform: translateY(-2px);
+        }
+        
+        /* Modern Card Effects */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .dark .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Neon Glow Effects */
+        .neon-glow {
+            box-shadow: 0 0 20px rgba(244, 63, 94, 0.3),
+                        0 0 40px rgba(244, 63, 94, 0.2),
+                        0 0 60px rgba(244, 63, 94, 0.1);
+        }
+        
+        .neon-blue {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3),
+                        0 0 40px rgba(59, 130, 246, 0.2);
+        }
+        
+        /* Modern Button Styles */
+        .btn-gradient {
+            background: linear-gradient(135deg, #f43f5e, #8b5cf6, #3b82f6);
+            background-size: 200% 200%;
+            animation: gradient 3s ease infinite;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Carousel Modern Styles */
+        .carousel-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 2rem;
+            perspective: 1000px;
+        }
+        
+        .carousel-slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .carousel-slide.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .carousel-slide.prev {
+            transform: translateX(-100%);
+        }
+        
+        .carousel-slide.next {
+            transform: translateX(100%);
+        }
+        
+        .carousel-dots {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        
+        .carousel-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+        
+        .carousel-dot.active {
+            width: 30px;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #f43f5e, #8b5cf6);
+            box-shadow: 0 0 15px rgba(244, 63, 94, 0.5);
+        }
+        
+        .carousel-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            color: #f43f5e;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dark .carousel-nav {
+            background: rgba(30, 41, 59, 0.9);
+        }
+        
+        .carousel-container:hover .carousel-nav {
+            opacity: 1;
+        }
+        
+        .carousel-prev {
+            left: 20px;
+            transform: translateY(-50%) translateX(-10px);
+        }
+        
+        .carousel-next {
+            right: 20px;
+            transform: translateY(-50%) translateX(10px);
+        }
+        
+        .carousel-container:hover .carousel-prev {
+            transform: translateY(-50%) translateX(0);
+        }
+        
+        .carousel-container:hover .carousel-next {
+            transform: translateY(-50%) translateX(0);
+        }
+        
+        /* Badge Modern Styles */
+        .popular-badge {
+            background: linear-gradient(135deg, #f43f5e, #ec4899);
+            animation: pulse-glow 2s infinite;
+        }
+        
+        .recommend-badge {
+            background: linear-gradient(135deg, #3b82f6, #06b6d4);
+        }
+        
+        .best-badge {
+            background: linear-gradient(135deg, #10b981, #84cc16);
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(244, 63, 94, 0); }
+        }
+        
+        /* Floating Animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+        
+        /* Slide In Animation */
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Logo Text Gradient */
+        .logo-text {
+            background: linear-gradient(135deg, #f43f5e, #8b5cf6, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 900;
+        }
+        
+        /* Input Modern Styles */
+        .modern-input {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid rgba(244, 63, 94, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .modern-input:focus {
+            border-color: #f43f5e;
+            box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.1);
+        }
+        
+        /* Category Card Hover */
+        .category-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .category-card:hover {
+            transform: translateY(-5px) scale(1.05);
+        }
+        
+        /* Product Card */
+        .product-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        /* Modal Modern Styles */
+        .modal {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .modal-open { 
+            opacity: 1 !important; 
+            pointer-events: auto !important; 
+        }
+        
+        .modal-content-open { 
+            transform: scale(1) !important; 
+            opacity: 1 !important; 
+        }
+        
+        /* Stats Card */
+        .stats-card {
+            background: linear-gradient(135deg, rgba(244, 63, 94, 0.1), rgba(59, 130, 246, 0.05));
+            border: 1px solid rgba(244, 63, 94, 0.1);
+        }
+        
+        /* Progress Bar */
+        .progress-bar {
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(244, 63, 94, 0.1);
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f43f5e, #8b5cf6);
+            border-radius: 3px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(244, 63, 94, 0.05);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #f43f5e, #8b5cf6);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+        }
+        
+        /* Loading Skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        
+        .dark .skeleton {
+            background: linear-gradient(90deg, #334155 25%, #475569 50%, #334155 75%);
+            background-size: 200% 100%;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gelap dark:to-slate-900 text-slate-800 dark:text-slate-200 max-w-md mx-auto min-h-screen relative font-inter">
 
-          themeToggle.addEventListener('click', () => {
-            let newTheme = document.body.classList.contains('light-theme') ? 'dark' : 'light';
-            localStorage.setItem('theme', newTheme);
-            applyTheme(newTheme);
-          });
-      }
+    <div id="sidebar" class="sidebar fixed top-0 left-0 h-full w-80 z-50 transform -translate-x-full shadow-2xl">
+        <div class="p-6 h-full flex flex-col">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-16 h-16 rounded-2xl overflow-hidden border-4 border-white dark:border-slate-800 shadow-xl floating-logo">
+                    <img src="https://files.catbox.moe/61sqej.png" alt="Logo Store" class="w-full h-full object-cover">
+                </div>
+                <div>
+                    <p class="font-black text-xl logo-text">kynas market</p>
+                    <p class="text-[11px] text-utama font-bold uppercase tracking-widest italic">Premium Digital Services</p>
+                    <div class="flex items-center gap-1 mt-1">
+                        <div class="w-1 h-1 rounded-full bg-utama animate-pulse"></div>
+                        <div class="w-1 h-1 rounded-full bg-sekunder animate-pulse delay-100"></div>
+                        <div class="w-1 h-1 rounded-full bg-hijau animate-pulse delay-200"></div>
+                        <p class="text-[9px] text-slate-400 ml-2">Online • Premium • Trusted</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-3 mb-8">
+                <div class="stats-card p-3 rounded-xl text-center">
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Products</p>
+                    <p class="font-black text-lg text-utama">45+</p>
+                </div>
+                <div class="stats-card p-3 rounded-xl text-center">
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Clients</p>
+                    <p class="font-black text-lg text-sekunder">500+</p>
+                </div>
+                <div class="stats-card p-3 rounded-xl text-center">
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Uptime</p>
+                    <p class="font-black text-lg text-hijau">99.9%</p>
+                </div>
+            </div>
+            
+            <div id="sidebar-menu" class="space-y-2 flex-1"></div>
+            
+            <div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-r from-utama to-sekunder flex items-center justify-center">
+                        <i class="fas fa-user text-white text-sm"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-sm">Guest User</p>
+                        <p class="text-[10px] text-slate-500">Select products to continue</p>
+                    </div>
+                </div>
+                <button onclick="toggleMenu()" class="w-full flex items-center justify-center gap-3 p-3 rounded-xl bg-gradient-to-r from-utama to-utama/80 text-white font-bold hover:shadow-lg hover:shadow-utama/30 transition-all active:scale-95">
+                    <i class="fas fa-times w-5"></i> Close Menu
+                </button>
+            </div>
+        </div>
+    </div>
 
-      // Tab Paket (Panel / VPS)
-      const toggleButtons = document.querySelectorAll('.toggle-btn');
-      const packageContainers = document.querySelectorAll('.package-container');
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden" onclick="toggleMenu()"></div>
 
-      toggleButtons.forEach(button => {
-        button.addEventListener('click', () => {
-          toggleButtons.forEach(btn => btn.classList.remove('active'));
-          packageContainers.forEach(container => container.classList.remove('active'));
-          button.classList.add('active');
-          const target = document.getElementById(`${button.dataset.package}-package`);
-          if(target) target.classList.add('active');
-        });
-      });
+    <nav class="flex justify-between items-center p-5 sticky top-0 glass-card z-30">
+        <div class="flex items-center gap-3">
+            <button onclick="toggleMenu()" class="w-12 h-12 flex items-center justify-center rounded-xl bg-white/80 dark:bg-kartuGelap/80 shadow-lg hover:shadow-xl transition-all hover:scale-105 active:scale-95 group">
+                <i class="fas fa-bars text-slate-600 dark:text-slate-300 group-hover:text-utama transition-colors"></i>
+            </button>
+            <div class="flex items-center gap-3 ml-2">
+                <div class="w-10 h-10 rounded-xl overflow-hidden border-2 border-utama/30 shadow-lg">
+                    <img src="https://files.catbox.moe/61sqej.png" alt="Logo" class="w-full h-full object-cover">
+                </div>
+                <div>
+                    <p class="font-black text-sm logo-text leading-tight">kynas market</p>
+                    <div class="flex items-center gap-1">
+                        <div class="w-1 h-1 rounded-full bg-utama"></div>
+                        <p class="text-[8px] text-slate-400 uppercase tracking-wider">Digital Market</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="toggleCart()" class="w-12 h-12 flex items-center justify-center rounded-xl bg-white/80 dark:bg-kartuGelap/80 text-utama shadow-lg relative hover:shadow-xl hover:scale-105 transition-all active:scale-95 group">
+                <i class="fas fa-shopping-cart group-hover:animate-bounce-slow"></i>
+                <span id="cart-count" class="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-utama to-utama/80 text-white text-[10px] rounded-full flex items-center justify-center font-black">0</span>
+            </button>
+            <button onclick="changeTheme()" class="w-12 h-12 flex items-center justify-center rounded-xl bg-white/80 dark:bg-kartuGelap/80 text-yellow-500 shadow-lg hover:shadow-xl hover:rotate-180 transition-all active:scale-95">
+                <i id="theme-icon" class="fas fa-sun"></i>
+            </button>
+        </div>
+    </nav>
 
-      // FAQ Accordion
-      const faqItems = document.querySelectorAll('.faq-item');
-      faqItems.forEach(item => {
-        const question = item.querySelector('.faq-question');
-        if(question) {
-            question.addEventListener('click', () => {
-              const isActive = item.classList.contains('active');
-              faqItems.forEach(otherItem => otherItem.classList.remove('active'));
-              if (!isActive) item.classList.add('active');
+    <div class="px-5 mt-5 mb-6">
+        <div class="carousel-container w-full h-48 rounded-3xl overflow-hidden shadow-2xl relative">
+<div class="carousel-slide active">
+    <div class="relative w-full h-full bg-gradient-to-br from-utama/30 via-utama/10 to-sekunder/20">
+        <img src="https://files.catbox.moe/v6gbdq.png" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+    </div>
+</div>  
+          
+<div class="carousel-slide">
+    <div class="relative w-full h-full bg-gradient-to-br from-sekunder/30 via-hijau/10 to-utama/20">
+        <img src="https://files.catbox.moe/61sqej.png" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+    </div>
+</div>
+            
+            <div class="carousel-slide">
+                <div class="relative w-full h-full bg-gradient-to-br from-hijau/30 via-sekunder/10 to-utama/20">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="text-center p-6">
+                            <div class="w-20 h-20 rounded-full bg-gradient-to-r from-utama/20 to-sekunder/20 flex items-center justify-center mx-auto mb-4 border-4 border-utama/30 shadow-2xl">
+                                <i class="fas fa-headset text-utama text-3xl"></i>
+                            </div>
+                            <p class="font-black text-white text-lg mb-2">24/7 Customer Support</p>
+                            <p class="text-white/90 text-xs font-medium mb-3">Fast Response • Professional Team</p>
+                            <div class="progress-bar w-48 mx-auto">
+                                <div class="progress-fill w-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+                </div>
+            </div>
+            
+            <div class="carousel-prev carousel-nav" onclick="prevSlide()">
+                <i class="fas fa-chevron-left text-sm"></i>
+            </div>
+            <div class="carousel-next carousel-nav" onclick="nextSlide()">
+                <i class="fas fa-chevron-right text-sm"></i>
+            </div>
+            
+            <div class="carousel-dots">
+                <span class="carousel-dot active" onclick="goToSlide(0)"></span>
+                <span class="carousel-dot" onclick="goToSlide(1)"></span>
+                <span class="carousel-dot" onclick="goToSlide(2)"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="px-5 mb-5">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="font-black text-sm uppercase tracking-[0.2em] text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                <i class="fas fa-layer-group text-utama"></i>
+                Kategori Layanan
+            </h2>
+            <span class="text-[10px] text-slate-500 font-bold bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full">Pilih Kategori</span>
+        </div>
+        <div class="flex gap-3 overflow-x-auto no-scrollbar pb-2" id="category-list">
+            </div>
+    </div>
+
+    <div class="px-5 mb-6 grid grid-cols-2 gap-3">
+        <button onclick="bukaModal('benefit')" class="glass-card p-4 rounded-2xl flex items-center justify-between shadow-lg hover:shadow-xl active:scale-95 transition-all group">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-r from-utama/20 to-sekunder/20 flex items-center justify-center text-utama shadow-inner group-hover:scale-110 transition-transform">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div>
+                    <span class="text-xs font-black uppercase tracking-wider block">Benefits</span>
+                    <span class="text-[10px] text-slate-500">Check details</span>
+                </div>
+            </div>
+            <i class="fas fa-chevron-right text-xs text-slate-400 group-hover:text-utama group-hover:translate-x-1 transition-all"></i>
+        </button>
+        
+        <div class="glass-card p-4 rounded-2xl flex items-center justify-between shadow-lg">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-r from-hijau/20 to-cyan/20 flex items-center justify-center text-hijau shadow-inner">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div>
+                    <span class="text-xs font-black uppercase tracking-wider block">Secure</span>
+                    <span class="text-[10px] text-slate-500">SSL Protected</span>
+                </div>
+            </div>
+            <i class="fas fa-check text-xs text-hijau"></i>
+        </div>
+    </div>
+
+    <div class="px-5 mb-10">
+        <div class="glass-card p-6 rounded-3xl shadow-2xl">
+            <div id="dynamic-inputs" class="mb-6 space-y-4"></div>
+            
+            <div class="flex justify-between items-center mb-5">
+                <div>
+                    <h3 class="font-black text-base flex items-center gap-2 mb-1">
+                        <i class="fas fa-shopping-bag text-utama"></i> 
+                        <span id="judul-produk">Pilih Paket</span>
+                    </h3>
+                    <p class="text-[10px] text-slate-500">Select your preferred package</p>
+                </div>
+                <div class="text-right">
+                    <span id="selected-count" class="text-xs font-black text-utama block">0 dipilih</span>
+                    <span class="text-[10px] text-slate-500">Total items</span>
+                </div>
+            </div>
+            
+            <div id="grid-produk" class="space-y-3 max-h-[400px] overflow-y-auto pr-2"></div>
+            
+            <div class="flex gap-3 mt-8">
+                <button onclick="openCheckoutModal()" class="flex-1 btn-gradient text-white py-4 rounded-2xl font-black text-xs uppercase tracking-wider shadow-xl hover:shadow-2xl active:scale-95 transition-all">
+                    Checkout Now
+                </button>
+                <button onclick="resetSelection()" class="w-12 glass-card text-slate-500 py-4 rounded-2xl font-black text-xs uppercase tracking-wider active:scale-95 transition-all hover:text-utama">
+                    <i class="fas fa-redo"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-benefit" class="modal fixed inset-0 z-[60] flex items-center justify-center px-5 opacity-0 pointer-events-none">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="tutupModal('benefit')"></div>
+        <div id="modal-benefit-content" class="relative glass-card w-full max-h-[80vh] rounded-3xl p-8 shadow-2xl transform scale-90 opacity-0 transition-all duration-300 overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="font-black text-xl uppercase tracking-tighter text-utama">Detail Benefit</h3>
+                    <p class="text-[10px] text-slate-500 mt-1">All benefits for selected service</p>
+                </div>
+                <button onclick="tutupModal('benefit')" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-gelap text-slate-400 hover:text-utama hover:rotate-90 transition-all"><i class="fas fa-times text-sm"></i></button>
+            </div>
+            <div id="isi-keuntungan" class="text-sm leading-relaxed font-medium text-slate-700 dark:text-slate-300 space-y-3"></div>
+            <button onclick="tutupModal('benefit')" class="w-full mt-8 py-4 rounded-2xl btn-gradient text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-utama/20 active:scale-95 transition-all">Oke, Saya Paham</button>
+        </div>
+    </div>
+
+    <div id="modal-checkout" class="modal fixed inset-0 z-[60] flex items-center justify-center px-5 opacity-0 pointer-events-none">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="tutupModal('checkout')"></div>
+        <div id="modal-checkout-content" class="relative glass-card w-full rounded-3xl p-8 shadow-2xl transform scale-90 opacity-0 transition-all duration-300">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="font-black text-xl uppercase tracking-tighter text-utama">Checkout</h3>
+                    <p class="text-[10px] text-slate-500 mt-1">Select payment method</p>
+                </div>
+                <button onclick="tutupModal('checkout')" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-gelap text-slate-400 hover:text-utama hover:rotate-90 transition-all"><i class="fas fa-times text-sm"></i></button>
+            </div>
+            <div id="checkout-details" class="mb-6 p-5 bg-slate-50 dark:bg-gelap rounded-2xl text-sm space-y-3"></div>
+            <div class="space-y-3">
+                <button onclick="checkoutWA()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-green-500 to-green-600 text-white font-black text-xs uppercase tracking-wider shadow-lg hover:shadow-xl transition-all active:scale-95 group">
+                    <i class="fab fa-whatsapp mr-2 group-hover:scale-110 transition-transform"></i> WhatsApp (6281235980179)
+                </button>
+                <button onclick="checkoutTelegram()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-black text-xs uppercase tracking-wider shadow-lg hover:shadow-xl transition-all active:scale-95 group">
+                    <i class="fab fa-telegram mr-2 group-hover:scale-110 transition-transform"></i> Telegram (@kynastore21)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-cart" class="modal fixed inset-0 z-[60] flex items-center justify-center px-5 opacity-0 pointer-events-none">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="tutupModal('cart')"></div>
+        <div id="modal-cart-content" class="relative glass-card w-full h-[80vh] rounded-3xl p-8 shadow-2xl transform scale-90 opacity-0 transition-all duration-300 flex flex-col">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="font-black text-xl uppercase tracking-tighter text-utama">Keranjang Belanja</h3>
+                    <p class="text-[10px] text-slate-500 mt-1">Your selected items</p>
+                </div>
+                <button onclick="tutupModal('cart')" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-gelap text-slate-400 hover:text-utama hover:rotate-90 transition-all"><i class="fas fa-times text-sm"></i></button>
+            </div>
+            <div id="cart-items" class="flex-1 overflow-y-auto space-y-3 pr-2 mb-4"></div>
+            <div id="cart-total" class="text-center font-black text-xl text-utama mb-4"></div>
+            <button onclick="openCheckoutModal()" class="w-full py-4 rounded-2xl btn-gradient text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-utama/20 active:scale-95 transition-all">Checkout Sekarang</button>
+        </div>
+    </div>
+
+    <footer class="p-10 text-center glass-card border-t border-slate-100 dark:border-slate-800/50">
+        <div class="w-20 h-20 rounded-2xl overflow-hidden border-4 border-white dark:border-slate-800 mx-auto mb-4 shadow-xl">
+            <img src="https://files.catbox.moe/61sqej.png" alt="Logo" class="w-full h-full object-cover">
+        </div>
+        <p class="text-utama font-black text-xl mb-2 tracking-tighter logo-text">kynas market</p>
+        <p class="text-xs text-slate-400 uppercase tracking-widest font-bold mb-3">PREMIUM DIGITAL SERVICES</p>
+        <p class="text-sm text-slate-600 dark:text-slate-400 mb-6 max-w-xs mx-auto">Provider layanan digital terpercaya dengan performa tinggi dan support 24/7.</p>
+        
+        <div class="flex justify-center gap-4 mb-6">
+            <a href="https://wa.me/6281235980179" class="w-12 h-12 rounded-xl bg-gradient-to-r from-green-500 to-green-600 flex items-center justify-center text-white hover:shadow-lg hover:shadow-green-500/30 transition-all">
+                <i class="fab fa-whatsapp text-lg"></i>
+            </a>
+            <a href="https://t.me/kynastore21" class="w-12 h-12 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white hover:shadow-lg hover:shadow-blue-500/30 transition-all">
+                <i class="fab fa-telegram text-lg"></i>
+            </a>
+            <a href="https://instagram.com/_autin.kynaa" class="w-12 h-12 rounded-xl bg-gradient-to-r from-utama to-utama/80 flex items-center justify-center text-white hover:shadow-lg hover:shadow-utama/30 transition-all">
+                <i class="fab fa-instagram text-lg"></i>
+            </a>
+        </div>
+        
+        <div class="grid grid-cols-3 gap-4 text-center mb-6">
+            <div>
+                <p class="text-xs font-black text-slate-700 dark:text-slate-300">99.9%</p>
+                <p class="text-[10px] text-slate-500">Uptime</p>
+            </div>
+            <div>
+                <p class="text-xs font-black text-slate-700 dark:text-slate-300">24/7</p>
+                <p class="text-[10px] text-slate-500">Support</p>
+            </div>
+            <div>
+                <p class="text-xs font-black text-slate-700 dark:text-slate-300">Secure</p>
+                <p class="text-[10px] text-slate-500">SSL</p>
+            </div>
+        </div>
+        
+        <p class="text-[10px] text-slate-500">© 2024 kynas market. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Semua data dan logika JavaScript TETAP SAMA seperti sebelumnya
+        // Hanya mengubah cara render untuk mengikuti desain modern
+        
+        const WA_NUMBER = "6281235980179";
+        const TELEGRAM_USER = "kynastore21";
+
+        // Carousel Variables
+        let currentSlide = 0;
+        let slideInterval;
+
+        // Database produk TETAP SAMA
+        const database = {
+            vps: {
+                name: "VPS KynasX",
+                icon: "fas fa-server",
+                keuntungan: "✨ <b>KEUNTUNGAN VPS KynasX:</b><br><br>🚀 High Performance NVMe Storage<br>⚡ CPU Dedicated Cores<br>🛡️ DDoS Protection Advanced<br>🌐 Bandwidth Unlimited (Fair Usage)<br>📊 Root Access Full Control<br>💾 Backup Otomatis Mingguan",
+                inputs: [],
+                packages: [
+                    { 
+                        id: "vps1", 
+                        name: "KYNASX VPS I (Starter)", 
+                        price: 60000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 4GB" }, 
+                            { icon: "fa-hdd", text: "Disk: 25GB NVMe" }, 
+                            { icon: "fa-microchip", text: "CPU: 2 Core" }, 
+                            { icon: "fa-satellite-dish", text: "Bandwidth: 4 TB" }, 
+                            { icon: "fa-shield-alt", text: "DDoS Protection" }
+                        ] 
+                    },
+                    { 
+                        id: "vps2", 
+                        name: "KYNASX VPS II (Mid-Range)", 
+                        price: 80000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 8GB" }, 
+                            { icon: "fa-hdd", text: "Disk: 50GB NVMe" }, 
+                            { icon: "fa-microchip", text: "CPU: 4 Core" }, 
+                            { icon: "fa-satellite-dish", text: "Bandwidth: 4 TB" }, 
+                            { icon: "fa-shield-alt", text: "DDoS Protection" }
+                        ] 
+                    },
+                    { 
+                        id: "vps3", 
+                        name: "KYNASX VPS III (🔥 POPULAR)", 
+                        price: 150000, 
+                        badge: "popular",
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 16GB" }, 
+                            { icon: "fa-hdd", text: "Disk: 100GB NVMe" }, 
+                            { icon: "fa-microchip", text: "CPU: 6 Core" }, 
+                            { icon: "fa-satellite-dish", text: "Bandwidth: 8 TB" }, 
+                            { icon: "fa-shield-alt", text: "DDoS Protection" }
+                        ] 
+                    },
+                    { 
+                        id: "vps4", 
+                        name: "KYNASX VPS IV (👑 RECOMMEND)", 
+                        price: 170000, 
+                        badge: "recommend",
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 18GB" }, 
+                            { icon: "fa-hdd", text: "Disk: 250GB NVMe" }, 
+                            { icon: "fa-microchip", text: "CPU: 4 Core" }, 
+                            { icon: "fa-satellite-dish", text: "Bandwidth: 10 TB" }, 
+                            { icon: "fa-shield-alt", text: "DDoS Protection" }
+                        ] 
+                    },
+                    { 
+                        id: "vps5", 
+                        name: "KYNASX VPS V (💎 TERBAIK)", 
+                        price: 210000, 
+                        badge: "best",
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 26GB" }, 
+                            { icon: "fa-hdd", text: "Disk: 350GB NVMe" }, 
+                            { icon: "fa-microchip", text: "CPU: 6 Core" }, 
+                            { icon: "fa-satellite-dish", text: "Bandwidth: 10 TB" }, 
+                            { icon: "fa-shield-alt", text: "DDoS Protection" }
+                        ] 
+                    }
+                ]
+            },
+            panel_silver: {
+                name: "Panel Silver",
+                icon: "fas fa-code",
+                keuntungan: "✨ <b>KEUNTUNGAN PANEL SILVER:</b><br><br>🚀 Intel Xeon Gold Processors<br>⚡ RAM Murni No Throttling<br>💾 NVMe Storage Super Fast<br>🔧 Support All Script Bot<br>🛡️ Uptime 99.9% Guarantee<br>📱 Mobile Friendly Panel",
+                inputs: [
+                    { id: "user", label: "Username Panel", type: "text", placeholder: "Contoh: kynasX" },
+                        ],
+                packages: [
+                    { 
+                        id: "silver1", 
+                        name: "SILVER I", 
+                        price: 3000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 1GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 50%" }, 
+                            { icon: "fa-server", text: "Intel Xeon Gold" }, 
+                            { icon: "fa-hdd", text: "Disk: 5GB NVMe" }
+                        ] 
+                    },
+                    { 
+                        id: "silver2", 
+                        name: "SILVER II", 
+                        price: 5000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 2GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 150%" }, 
+                            { icon: "fa-server", text: "Intel Xeon Gold" }, 
+                            { icon: "fa-hdd", text: "Disk: 7GB NVMe" }
+                        ] 
+                    },
+                    { 
+                        id: "silver3", 
+                        name: "SILVER III (🔥 POPULAR)", 
+                        price: 6000, 
+                        badge: "popular",
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 3GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 200%" }, 
+                            { icon: "fa-server", text: "Intel Xeon Gold" }, 
+                            { icon: "fa-hdd", text: "Disk: 10GB NVMe" }
+                        ] 
+                    },
+                    { 
+                        id: "silver4", 
+                        name: "SILVER IV", 
+                        price: 8000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 5GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 250%" }, 
+                            { icon: "fa-server", text: "Intel Xeon Gold" }, 
+                            { icon: "fa-hdd", text: "Disk: 13GB NVMe" }
+                        ] 
+                    },
+                    { 
+                        id: "silver5", 
+                        name: "SILVER V", 
+                        price: 10000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 7GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 300%" }, 
+                            { icon: "fa-server", text: "Intel Xeon Gold" }, 
+                            { icon: "fa-hdd", text: "Disk: 15GB NVMe" }
+                        ] 
+                    },
+                    { 
+                        id: "silver6", 
+                        name: "SILVER VI", 
+                        price: 15000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 10GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 350%" }, 
+                            { icon: "fa-server", text: "Intel Xeon Gold" }, 
+                            { icon: "fa-hdd", text: "Disk: 20GB NVMe" }
+                        ] 
+                    },
+                    { 
+                        id: "silver7", 
+                        name: "SILVER VII", 
+                        price: 20000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 15GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 400%" }, 
+                            { icon: "fa-server", text: "Intel Xeon Gold" }, 
+                            { icon: "fa-hdd", text: "Disk: 25GB NVMe" }
+                        ] 
+                    }
+                ]
+            },
+            panel_gold: {
+                name: "Panel Gold",
+                icon: "fas fa-crown",
+                keuntungan: "✨ <b>KEUNTUNGAN PANEL GOLD:</b><br><br>💎 AMD EPYC 7543 Processors<br>⚡ Performance 2x Faster<br>🚀 NVMe Enterprise Grade<br>🔧 Priority Support 24/7<br>🛡️ Advanced Security Layer<br>📊 Real-time Monitoring",
+                inputs: [
+                    { id: "user", label: "Username Panel", type: "text", placeholder: "Contoh: kynasX" },
+                ],
+                packages: [
+                    { 
+                        id: "gold1", 
+                        name: "GOLD I", 
+                        price: 5000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 1GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 100%" }, 
+                            { icon: "fa-server", text: "AMD EPYC 7543" }, 
+                            { icon: "fa-hdd", text: "Disk: 10GB NVMe" }
+                        ] 
+                    },
+                    { 
+                        id: "gold2", 
+                        name: "GOLD II", 
+                        price: 8000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 2GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 150%" }, 
+                            { icon: "fa-server", text: "AMD EPYC 7543" }, 
+                            { icon: "fa-hdd", text: "Disk: 15GB NVMe" }
+                        ] 
+                    },
+                    { 
+                        id: "gold3", 
+                        name: "GOLD III (👑 BEST CHOICE)", 
+                        price: 12000, 
+                        badge: "recommend",
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 3GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 200%" }, 
+                            { icon: "fa-server", text: "AMD EPYC 7543" }, 
+                            { icon: "fa-hdd", text: "Disk: 20GB NVMe" }
+                        ] 
+                    },
+                    { 
+                        id: "gold4", 
+                        name: "GOLD IV", 
+                        price: 18000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 5GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 250%" }, 
+                            { icon: "fa-server", text: "AMD EPYC 7543" }, 
+                            { icon: "fa-hdd", text: "Disk: 30GB NVMe" }
+                        ] 
+                    },
+                    { 
+                        id: "gold5", 
+                        name: "GOLD V", 
+                        price: 25000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 7GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 300%" }, 
+                            { icon: "fa-server", text: "AMD EPYC 7543" }, 
+                            { icon: "fa-hdd", text: "Disk: 40GB NVMe" }
+                        ] 
+                    },
+                    { 
+                        id: "gold6", 
+                        name: "GOLD VI", 
+                        price: 35000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 10GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 350%" }, 
+                            { icon: "fa-server", text: "AMD EPYC 7543" }, 
+                            { icon: "fa-hdd", text: "Disk: 50GB NVMe" }
+                        ] 
+                    },
+                    { 
+                        id: "gold7", 
+                        name: "GOLD VII", 
+                        price: 50000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 15GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 400%" }, 
+                            { icon: "fa-server", text: "AMD EPYC 7543" }, 
+                            { icon: "fa-hdd", text: "Disk: 70GB NVMe" }
+                        ] 
+                    }
+                ]
+            },
+            minecraft_standard: {
+                name: "Minecraft Standard",
+                icon: "fas fa-gamepad",
+                keuntungan: "✨ <b>KEUNTUNGAN MINECRAFT STANDARD:</b><br><br>🎮 Intel Xeon Gold Processor<br>⚡ Low Latency Network<br>🛡️ Anti-DDoS Protection<br>📊 Panel Control Modern<br>🔧 Auto Backup System<br>🌐 Unlimited Bandwidth",
+                inputs: [
+                    { id: "server_name", label: "Nama Server", type: "text", placeholder: "Contoh: MyServer" },
+                    { id: "version", label: "Versi Minecraft", type: "text", placeholder: "Contoh: 1.20.1" }
+                ],
+                packages: [
+                    { 
+                        id: "mc-std-1", 
+                        name: "R1 C1 (1GB RAM)", 
+                        price: 4000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 1GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 1 Core" }, 
+                            { icon: "fa-server", text: "Intel Xeon Gold" }, 
+                            { icon: "fa-users", text: "Slot: 20 Players" }
+                        ] 
+                    },
+                    { 
+                        id: "mc-std-2", 
+                        name: "R2 C1 (2GB RAM)", 
+                        price: 8000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 2GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 1 Core" }, 
+                            { icon: "fa-server", text: "Intel Xeon Gold" }, 
+                            { icon: "fa-users", text: "Slot: 30 Players" }
+                        ] 
+                    },
+                    { 
+                        id: "mc-std-3", 
+                        name: "R3 C1 (3GB RAM)", 
+                        price: 12000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 3GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 1 Core" }, 
+                            { icon: "fa-server", text: "Intel Xeon Gold" }, 
+                            { icon: "fa-users", text: "Slot: 40 Players" }
+                        ] 
+                    },
+                    { 
+                        id: "mc-std-4", 
+                        name: "R4 C1 (4GB RAM)", 
+                        price: 16000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 4GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 1 Core" }, 
+                            { icon: "fa-server", text: "Intel Xeon Gold" }, 
+                            { icon: "fa-users", text: "Slot: 50 Players" }
+                        ] 
+                    },
+                    { 
+                        id: "mc-std-5", 
+                        name: "R5 C2 (5GB RAM)", 
+                        price: 20000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 5GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 2 Core" }, 
+                            { icon: "fa-server", text: "Intel Xeon Gold" }, 
+                            { icon: "fa-users", text: "Slot: 60 Players" }
+                        ] 
+                    },
+                    { 
+                        id: "mc-std-8", 
+                        name: "R8 C2 (8GB RAM)", 
+                        price: 32000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 8GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 2 Core" }, 
+                            { icon: "fa-server", text: "Intel Xeon Gold" }, 
+                            { icon: "fa-users", text: "Slot: 80 Players" }
+                        ] 
+                    },
+                    { 
+                        id: "mc-std-10", 
+                        name: "R10 C2 (10GB RAM)", 
+                        price: 40000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 10GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 2 Core" }, 
+                            { icon: "fa-server", text: "Intel Xeon Gold" }, 
+                            { icon: "fa-users", text: "Slot: 100 Players" }
+                        ] 
+                    },
+                    { 
+                        id: "mc-std-15", 
+                        name: "R15 C2 (15GB RAM)", 
+                        price: 60000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 15GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 2 Core" }, 
+                            { icon: "fa-server", text: "Intel Xeon Gold" }, 
+                            { icon: "fa-users", text: "Slot: 150 Players" }
+                        ] 
+                    }
+                ]
+            },
+            minecraft_premium: {
+                name: "Minecraft Premium",
+                icon: "fas fa-gem",
+                keuntungan: "✨ <b>KEUNTUNGAN MINECRAFT PREMIUM:</b><br><br>💎 AMD EPYC 7543 Processor<br>⚡ Ultra Low Latency<br>🚀 NVMe Storage Premium<br>🛡️ Advanced DDoS Protection<br>📊 Premium Control Panel<br>🔧 Priority Support 24/7",
+                inputs: [
+                    { id: "server_name", label: "Nama Server", type: "text", placeholder: "Contoh: PremiumServer" },
+                    { id: "version", label: "Versi Minecraft", type: "text", placeholder: "Contoh: 1.20.1" }
+                ],
+                packages: [
+                    { 
+                        id: "mc-prem-1", 
+                        name: "R1 C1 (1GB RAM)", 
+                        price: 7000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 1GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 1 Core" }, 
+                            { icon: "fa-server", text: "AMD EPYC 7543" }, 
+                            { icon: "fa-users", text: "Slot: 25 Players" }
+                        ] 
+                    },
+                    { 
+                        id: "mc-prem-2", 
+                        name: "R2 C1 (2GB RAM)", 
+                        price: 14000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 2GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 1 Core" }, 
+                            { icon: "fa-server", text: "AMD EPYC 7543" }, 
+                            { icon: "fa-users", text: "Slot: 35 Players" }
+                        ] 
+                    },
+                    { 
+                        id: "mc-prem-3", 
+                        name: "R3 C1 (3GB RAM)", 
+                        price: 21000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 3GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 1 Core" }, 
+                            { icon: "fa-server", text: "AMD EPYC 7543" }, 
+                            { icon: "fa-users", text: "Slot: 45 Players" }
+                        ] 
+                    },
+                    { 
+                        id: "mc-prem-4", 
+                        name: "R4 C1 (4GB RAM)", 
+                        price: 28000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 4GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 1 Core" }, 
+                            { icon: "fa-server", text: "AMD EPYC 7543" }, 
+                            { icon: "fa-users", text: "Slot: 55 Players" }
+                        ] 
+                    },
+                    { 
+                        id: "mc-prem-5", 
+                        name: "R5 C2 (5GB RAM)", 
+                        price: 35000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 5GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 2 Core" }, 
+                            { icon: "fa-server", text: "AMD EPYC 7543" }, 
+                            { icon: "fa-users", text: "Slot: 65 Players" }
+                        ] 
+                    },
+                    { 
+                        id: "mc-prem-8", 
+                        name: "R8 C2 (8GB RAM)", 
+                        price: 56000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 8GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 2 Core" }, 
+                            { icon: "fa-server", text: "AMD EPYC 7543" }, 
+                            { icon: "fa-users", text: "Slot: 85 Players" }
+                        ] 
+                    },
+                    { 
+                        id: "mc-prem-10", 
+                        name: "R10 C2 (10GB RAM)", 
+                        price: 70000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 10GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 2 Core" }, 
+                            { icon: "fa-server", text: "AMD EPYC 7543" }, 
+                            { icon: "fa-users", text: "Slot: 105 Players" }
+                        ] 
+                    },
+                    { 
+                        id: "mc-prem-15", 
+                        name: "R15 C2 (15GB RAM)", 
+                        price: 100000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 15GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 2 Core" }, 
+                            { icon: "fa-server", text: "AMD EPYC 7543" }, 
+                            { icon: "fa-users", text: "Slot: 155 Players" }
+                        ] 
+                    }
+                ]
+            },
+            samp_linux: {
+                name: "SA-MP Linux",
+                icon: "fas fa-laptop",
+                keuntungan: "✨ <b>KEUNTUNGAN SA-MP LINUX:</b><br><br>🐧 Linux Ubuntu LTS<br>⚡ Intel Xeon Gold CPU<br>🚀 High Performance<br>🔧 Auto Script Installer<br>🛡️ Stable & Secure<br>📊 Easy Management Panel",
+                inputs: [
+                    { id: "hostname", label: "Hostname Server", type: "text", placeholder: "Contoh: My SA-MP Server" },
+                    { id: "gamemode", label: "Gamemode", type: "text", placeholder: "Contoh: RPG/Race/DM" }
+                ],
+                packages: [
+                    { 
+                        id: "samp-l1", 
+                        name: "SAMP-L I", 
+                        price: 3000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 1GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 50%" }, 
+                            { icon: "fa-users", text: "Slot: 10 Player" }, 
+                            { icon: "fa-server", text: "Intel Xeon Gold" }
+                        ] 
+                    },
+                    { 
+                        id: "samp-l2", 
+                        name: "SAMP-L II", 
+                        price: 5000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 2GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 100%" }, 
+                            { icon: "fa-users", text: "Slot: 20 Player" }, 
+                            { icon: "fa-server", text: "Intel Xeon Gold" }
+                        ] 
+                    },
+                    { 
+                        id: "samp-l3", 
+                        name: "SAMP-L III (🔥 POPULAR)", 
+                        price: 8000, 
+                        badge: "popular",
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 3GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 150%" }, 
+                            { icon: "fa-users", text: "Slot: 30 Player" }, 
+                            { icon: "fa-server", text: "Intel Xeon Gold" }
+                        ] 
+                    },
+                    { 
+                        id: "samp-l4", 
+                        name: "SAMP-L IV", 
+                        price: 12000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 5GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 200%" }, 
+                            { icon: "fa-users", text: "Slot: 40 Player" }, 
+                            { icon: "fa-server", text: "Intel Xeon Gold" }
+                        ] 
+                    },
+                    { 
+                        id: "samp-l5", 
+                        name: "SAMP-L V", 
+                        price: 18000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 8GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 250%" }, 
+                            { icon: "fa-users", text: "Slot: 50 Player" }, 
+                            { icon: "fa-server", text: "Intel Xeon Gold" }
+                        ] 
+                    },
+                    { 
+                        id: "samp-l6", 
+                        name: "SAMP-L VI", 
+                        price: 25000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 10GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 300%" }, 
+                            { icon: "fa-users", text: "Slot: 70 Player" }, 
+                            { icon: "fa-server", text: "Intel Xeon Gold" }
+                        ] 
+                    },
+                    { 
+                        id: "samp-l7", 
+                        name: "SAMP-L VII", 
+                        price: 40000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 15GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 400%" }, 
+                            { icon: "fa-users", text: "Slot: 90 Player" }, 
+                            { icon: "fa-server", text: "Intel Xeon Gold" }
+                        ] 
+                    }
+                ]
+            },
+            samp_windows: {
+                name: "SA-MP Windows",
+                icon: "fas fa-computer",
+                keuntungan: "✨ <b>KEUNTUNGAN SA-MP WINDOWS:</b><br><br>🪟 Windows Server 2022<br>💎 AMD EPYC Processor<br>🚀 DirectX Support<br>🔧 .NET Framework Ready<br>🛡️ Windows Firewall<br>📊 Remote Desktop Access",
+                inputs: [
+                    { id: "hostname", label: "Hostname Server", type: "text", placeholder: "Contoh: Windows SA-MP" },
+                    { id: "gamemode", label: "Gamemode", type: "text", placeholder: "Contoh: RPG/Race/DM" }
+                ],
+                packages: [
+                    { 
+                        id: "samp-w1", 
+                        name: "SAMP-W I", 
+                        price: 5000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 1GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 100%" }, 
+                            { icon: "fa-users", text: "Slot: 20 Player" }, 
+                            { icon: "fa-server", text: "AMD EPYC 7543" }
+                        ] 
+                    },
+                    { 
+                        id: "samp-w2", 
+                        name: "SAMP-W II", 
+                        price: 10000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 2GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 150%" }, 
+                            { icon: "fa-users", text: "Slot: 30 Player" }, 
+                            { icon: "fa-server", text: "AMD EPYC 7543" }
+                        ] 
+                    },
+                    { 
+                        id: "samp-w3", 
+                        name: "SAMP-W III (👑 BEST CHOICE)", 
+                        price: 15000, 
+                        badge: "recommend",
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 3GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 200%" }, 
+                            { icon: "fa-users", text: "Slot: 40 Player" }, 
+                            { icon: "fa-server", text: "AMD EPYC 7543" }
+                        ] 
+                    },
+                    { 
+                        id: "samp-w4", 
+                        name: "SAMP-W IV", 
+                        price: 20000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 5GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 250%" }, 
+                            { icon: "fa-users", text: "Slot: 50 Player" }, 
+                            { icon: "fa-server", text: "AMD EPYC 7543" }
+                        ] 
+                    },
+                    { 
+                        id: "samp-w5", 
+                        name: "SAMP-W V", 
+                        price: 30000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 8GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 300%" }, 
+                            { icon: "fa-users", text: "Slot: 60 Player" }, 
+                            { icon: "fa-server", text: "AMD EPYC 7543" }
+                        ] 
+                    },
+                    { 
+                        id: "samp-w6", 
+                        name: "SAMP-W VI", 
+                        price: 45000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 10GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 350%" }, 
+                            { icon: "fa-users", text: "Slot: 80 Player" }, 
+                            { icon: "fa-server", text: "AMD EPYC 7543" }
+                        ] 
+                    },
+                    { 
+                        id: "samp-w7", 
+                        name: "SAMP-W VII", 
+                        price: 65000, 
+                        specs: [
+                            { icon: "fa-memory", text: "RAM: 15GB" }, 
+                            { icon: "fa-microchip", text: "CPU: 450%" }, 
+                            { icon: "fa-users", text: "Slot: 100 Player" }, 
+                            { icon: "fa-server", text: "AMD EPYC 7543" }
+                        ] 
+                    }
+                ]
+            },
+            access_panel: {
+                name: "Akses Panel",
+                icon: "fas fa-users-cog",
+                keuntungan: "✨ <b>KEUNTUNGAN AKSES PANEL:</b><br><br>🚀 Buka Bisnis Sendiri<br>💎 Dapatkan Keuntungan Besar<br>📊 Management System Lengkap<br>🔧 Tools Reseller Premium<br>🛡️ Support Team 24/7<br>📈 Potensi Cuan Unlimited",
+                inputs: [],
+                packages: [
+                    { 
+                        id: "reseller", 
+                        name: "RESELLER PANEL", 
+                        price: 25000, 
+                        specs: [
+                            { icon: "fa-bolt", text: "Akses Create Panel (4 Server)" }, 
+                            { icon: "fa-store", text: "Bebas Jual ke Buyer" }, 
+                            { icon: "fa-check-circle", text: "Aturan Fleksibel" }, 
+                            { icon: "fa-headset", text: "Support Group" }
+                        ] 
+                    },
+                    { 
+                        id: "pt-panel", 
+                        name: "PT PANEL", 
+                        price: 30000, 
+                        specs: [
+                            { icon: "fa-gem", text: "Semua Benefit Panel" }, 
+                            { icon: "fa-user-plus", text: "Buka Reseller Panel" }, 
+                            { icon: "fa-chart-line", text: "Potensi Cuan Besar" }, 
+                            { icon: "fa-sitemap", text: "Manajemen Bawahan" }
+                        ] 
+                    },
+                    { 
+                        id: "owner-access", 
+                        name: "TK (OWNER)", 
+                        price: 35000, 
+                        specs: [
+                            { icon: "fa-crown", text: "Semua Benefit Diatas" }, 
+                            { icon: "fa-network-wired", text: "Buka Reseller & PT" }, 
+                            { icon: "fa-key", text: "Akses Perpanjangan" }, 
+                            { icon: "fa-shield-alt", text: "Full Control Access" }
+                        ] 
+                    }
+                ]
+            },
+            script_bot: {
+                name: "Script Bot",
+                icon: "fas fa-robot",
+                keuntungan: "✨ <b>KEUNTUNGAN SCRIPT BOT:</b><br><br>🤖 Script Premium Quality<br>⚡ Update Berkala Gratis<br>🔧 No Encrypt (Open Source)<br>📱 Support Multi Platform<br️>🛡️ Anti-Ban Protection<br>💎 Lifetime Access",
+                inputs: [],
+                packages: [
+                    { 
+                        id: "bot-store-v1", 
+                        name: "SCRIPT BOT STORE V1", 
+                        price: 25000, 
+                        specs: [
+                            { icon: "fa-store", text: "Script Permanent" }, 
+                            { icon: "fa-cogs", text: "Fitur Lengkap" }, 
+                            { icon: "fa-shopping-cart", text: "Untuk Toko Online" }, 
+                            { icon: "fa-download", text: "Instant Download" }
+                        ] 
+                    },
+                    { 
+                        id: "push-kontak", 
+                        name: "SCRIPT PUSH KONTAK", 
+                        price: 15000, 
+                        specs: [
+                            { icon: "fa-bullhorn", text: "Push Kontak Otomatis" }, 
+                            { icon: "fa-cogs", text: "Multi Fitur" }, 
+                            { icon: "fa-download", text: "Instant Download" }, 
+                            { icon: "fa-sync", text: "Update Berkala" }
+                        ] 
+                    }
+                ]
+            }
+        };
+
+        const sidebarLinks = [
+            { name: "Instagram", icon: "fab fa-instagram", link: "https://instagram.com/_autin.kynaa", color: "text-utama" },
+            { name: "WhatsApp", icon: "fab fa-whatsapp", link: `https://wa.me/${WA_NUMBER}`, color: "text-green-500" },
+            { name: "Telegram", icon: "fab fa-telegram", link: `https://t.me/${TELEGRAM_USER}`, color: "text-blue-500" }
+        ];
+
+        let selectedProducts = [];
+        let activeCategory = 'vps';
+        let cart = [];
+
+        // Carousel Functions - Modernized
+        function initCarousel() {
+            const slides = document.querySelectorAll('.carousel-slide');
+            const dots = document.querySelectorAll('.carousel-dot');
+            
+            // Set initial positions
+            slides.forEach((slide, index) => {
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                    slide.style.opacity = '1';
+                    slide.style.transform = 'translateX(0)';
+                } else if (index < currentSlide) {
+                    slide.classList.remove('active');
+                    slide.style.opacity = '0';
+                    slide.style.transform = 'translateX(-100%)';
+                } else {
+                    slide.classList.remove('active');
+                    slide.style.opacity = '0';
+                    slide.style.transform = 'translateX(100%)';
+                }
+            });
+            
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentSlide);
             });
         }
-      });
 
-      // Back to Top
-      const backToTopButton = document.getElementById('backToTop');
-      if(backToTopButton) {
-          window.addEventListener('scroll', () => {
-            backToTopButton.classList.toggle('visible', window.scrollY > 300);
-          });
-          backToTopButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          });
-      }
+        function nextSlide() {
+            const slides = document.querySelectorAll('.carousel-slide');
+            const dots = document.querySelectorAll('.carousel-dot');
+            
+            slides[currentSlide].classList.remove('active');
+            slides[currentSlide].style.opacity = '0';
+            slides[currentSlide].style.transform = 'translateX(-100%)';
+            
+            dots[currentSlide].classList.remove('active');
+            
+            currentSlide = (currentSlide + 1) % slides.length;
+            
+            slides[currentSlide].classList.add('active');
+            slides[currentSlide].style.opacity = '1';
+            slides[currentSlide].style.transform = 'translateX(0)';
+            
+            dots[currentSlide].classList.add('active');
+            
+            resetCarouselInterval();
+        }
 
-      // Fade In Animation
-      const fadeInElements = document.querySelectorAll('.fade-in');
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-            observer.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.1 });
-      fadeInElements.forEach(el => observer.observe(el));
-    });
-  </script>
+        function prevSlide() {
+            const slides = document.querySelectorAll('.carousel-slide');
+            const dots = document.querySelectorAll('.carousel-dot');
+            
+            slides[currentSlide].classList.remove('active');
+            slides[currentSlide].style.opacity = '0';
+            slides[currentSlide].style.transform = 'translateX(100%)';
+            
+            dots[currentSlide].classList.remove('active');
+            
+            currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+            
+            slides[currentSlide].classList.add('active');
+            slides[currentSlide].style.opacity = '1';
+            slides[currentSlide].style.transform = 'translateX(0)';
+            
+            dots[currentSlide].classList.add('active');
+            
+            resetCarouselInterval();
+        }
+
+        function goToSlide(index) {
+            const slides = document.querySelectorAll('.carousel-slide');
+            const dots = document.querySelectorAll('.carousel-dot');
+            
+            slides[currentSlide].classList.remove('active');
+            slides[currentSlide].style.opacity = '0';
+            
+            if (index > currentSlide) {
+                slides[currentSlide].style.transform = 'translateX(-100%)';
+            } else {
+                slides[currentSlide].style.transform = 'translateX(100%)';
+            }
+            
+            dots[currentSlide].classList.remove('active');
+            
+            currentSlide = index;
+            
+            slides[currentSlide].classList.add('active');
+            slides[currentSlide].style.opacity = '1';
+            slides[currentSlide].style.transform = 'translateX(0)';
+            
+            dots[currentSlide].classList.add('active');
+            
+            resetCarouselInterval();
+        }
+
+        function startCarousel() {
+            slideInterval = setInterval(nextSlide, 5000);
+        }
+
+        function resetCarouselInterval() {
+            clearInterval(slideInterval);
+            startCarousel();
+        }
+
+        // Store Functions - Modernized
+        function renderSidebar() {
+            document.getElementById('sidebar-menu').innerHTML = sidebarLinks.map(item => `
+                <a href="${item.link}" target="_blank" class="flex items-center gap-4 p-4 rounded-2xl font-semibold hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-300 slide-in group">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-r from-utama/10 to-sekunder/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <i class="${item.icon} text-lg ${item.color}"></i>
+                    </div>
+                    <span class="text-sm flex-1">${item.name}</span>
+                    <i class="fas fa-arrow-right text-xs text-slate-400 group-hover:text-utama group-hover:translate-x-1 transition-all"></i>
+                </a>
+            `).join('');
+        }
+
+        function renderCategories() {
+            const container = document.getElementById('category-list');
+            container.innerHTML = Object.keys(database).map(key => `
+                <button onclick="pilihKategori('${key}')" id="btn-${key}" class="category-btn group flex flex-col items-center justify-center min-w-[90px] p-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-kartuGelap hover:border-utama hover:shadow-md transition-all duration-300">
+                    <i id="icon-${key}" class="${database[key].icon} text-xl mb-2 text-slate-400 group-hover:text-utama transition-colors"></i>
+                    <span id="text-${key}" class="text-[10px] font-bold text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-200 transition-colors text-center leading-tight">${database[key].name}</span>
+                </button>
+            `).join('');
+        }
+
+        function pilihKategori(key) {
+            activeCategory = key;
+            
+            // Reset semua kategori ke style default (bersih/clean)
+            Object.keys(database).forEach(k => {
+                const btn = document.getElementById(`btn-${k}`);
+                const icon = document.getElementById(`icon-${k}`);
+                const text = document.getElementById(`text-${k}`);
+
+                // Style Default (Tidak Aktif)
+                btn.className = "category-btn group flex flex-col items-center justify-center min-w-[90px] h-[90px] p-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-kartuGelap hover:border-utama hover:shadow-lg transition-all duration-300 active:scale-95";
+                icon.className = `${database[k].icon} text-2xl mb-2 text-slate-400 group-hover:text-utama transition-colors`;
+                text.className = "text-[10px] font-bold text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300 transition-colors text-center leading-tight";
+            });
+
+            // Set Style Aktif (Solid Color, High Contrast)
+            const activeBtn = document.getElementById(`btn-${key}`);
+            const activeIcon = document.getElementById(`icon-${key}`);
+            const activeText = document.getElementById(`text-${key}`);
+
+            if(activeBtn) {
+                // Style saat aktif: Gradient background, text putih
+                activeBtn.className = "category-btn group flex flex-col items-center justify-center min-w-[90px] h-[90px] p-2 rounded-2xl bg-gradient-to-br from-utama to-sekunder shadow-lg shadow-utama/30 transform scale-105 transition-all duration-300";
+                activeIcon.className = `${database[key].icon} text-2xl mb-2 text-white transition-colors`;
+                activeText.className = "text-[10px] font-black text-white text-center leading-tight";
+            }
+
+            // Update judul
+            document.getElementById('judul-produk').innerText = database[key].name.toUpperCase();
+            
+            // Render Inputs
+            const inputContainer = document.getElementById('dynamic-inputs');
+            inputContainer.innerHTML = database[key].inputs.map(inp => `
+                <div class="animate-slide-up">
+                    <label class="text-xs font-black uppercase text-slate-400 ml-1 mb-2 block">${inp.label}</label>
+                    <input type="${inp.type}" id="input-${inp.id}" placeholder="${inp.placeholder}" class="modern-input w-full p-4 rounded-2xl focus:outline-none text-sm font-medium transition-all duration-300">
+                </div>
+            `).join('');
+
+            // Render Products
+            const grid = document.getElementById('grid-produk');
+            grid.innerHTML = database[key].packages.map(item => {
+                const isSelected = selectedProducts.includes(item.id);
+                const badge = item.badge ? 
+                    `<span class="${item.badge === 'popular' ? 'popular-badge' : item.badge === 'recommend' ? 'recommend-badge' : 'best-badge'} text-[9px] text-white px-3 py-1.5 rounded-full font-black absolute -top-2 -right-2 z-10 shadow-lg">${item.badge === 'popular' ? '🔥 POPULAR' : item.badge === 'recommend' ? '👑 RECOMMEND' : '💎 BEST'}</span>` : '';
+                
+                return `
+                <div onclick="selectItem('${item.id}', this)" class="product-card relative bg-white dark:bg-kartuGelap/50 p-5 rounded-3xl border-2 ${isSelected ? 'border-utama product-selected' : 'border-transparent'} transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl">
+                    ${badge}
+                    <div class="flex justify-between items-start mb-4">
+                        <p class="font-black text-xs uppercase flex-1 pr-3">${item.name}</p>
+                        <div class="text-utama font-black text-lg">Rp ${item.price.toLocaleString()}</div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        ${item.specs.map(spec => `
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-xl bg-gradient-to-r from-utama/10 to-sekunder/10 flex items-center justify-center shadow-inner">
+                                    <i class="fas ${spec.icon} text-xs text-utama"></i>
+                                </div>
+                                <span class="text-[10px] font-bold text-slate-700 dark:text-slate-300 flex-1">${spec.text}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    ${isSelected ? 
+                        `<div class="mt-4 text-center">
+                            <span class="text-xs text-utama font-black flex items-center justify-center gap-2"><i class="fas fa-check-circle"></i> Dipilih</span>
+                        </div>` : ''}
+                </div>
+            `}).join('');
+            
+            updateSelectedCount();
+        }
+
+        function selectItem(itemId, element) {
+            const index = selectedProducts.indexOf(itemId);
+            if (index === -1) {
+                selectedProducts.push(itemId);
+                element.classList.add('product-selected', 'border-utama');
+                element.classList.remove('border-transparent');
+            } else {
+                selectedProducts.splice(index, 1);
+                element.classList.remove('product-selected', 'border-utama');
+                element.classList.add('border-transparent');
+            }
+            
+            // Update cart
+            cart = selectedProducts.map(id => {
+                const category = database[activeCategory];
+                const product = category.packages.find(p => p.id === id);
+                return {
+                    category: category.name,
+                    name: product.name,
+                    price: product.price,
+                    id: product.id
+                };
+            });
+            
+            updateCartCount();
+            updateSelectedCount();
+            updateCartDisplay();
+        }
+
+        function updateSelectedCount() {
+            document.getElementById('selected-count').textContent = `${selectedProducts.length} dipilih`;
+        }
+
+        function updateCartCount() {
+            document.getElementById('cart-count').textContent = cart.length;
+        }
+
+        function updateCartDisplay() {
+            const cartItems = document.getElementById('cart-items');
+            const cartTotal = document.getElementById('cart-total');
+            
+            if (cart.length === 0) {
+                cartItems.innerHTML = `
+                    <div class="text-center py-10 text-slate-400">
+                        <div class="w-20 h-20 rounded-full bg-gradient-to-r from-utama/10 to-sekunder/10 flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-shopping-cart text-3xl text-utama"></i>
+                        </div>
+                        <p class="text-sm font-bold mb-1">Keranjang kosong</p>
+                        <p class="text-xs">Pilih produk terlebih dahulu</p>
+                    </div>
+                `;
+                cartTotal.textContent = '';
+                return;
+            }
+            
+            let total = 0;
+            cartItems.innerHTML = cart.map(item => {
+                total += item.price;
+                return `
+                    <div class="flex justify-between items-center p-4 bg-slate-50 dark:bg-gelap/50 rounded-2xl slide-in border border-slate-100 dark:border-slate-800">
+                        <div class="flex-1">
+                            <p class="text-xs font-black uppercase">${item.name}</p>
+                            <p class="text-[10px] text-slate-500">${item.category}</p>
+                        </div>
+                        <div class="text-utama font-black text-base">Rp ${item.price.toLocaleString()}</div>
+                    </div>
+                `;
+            }).join('');
+            
+            cartTotal.textContent = `Total: Rp ${total.toLocaleString()}`;
+        }
+
+        function toggleCart() {
+            updateCartDisplay();
+            bukaModal('cart');
+        }
+
+        function resetSelection() {
+            selectedProducts = [];
+            cart = [];
+            updateCartCount();
+            updateSelectedCount();
+            pilihKategori(activeCategory);
+        }
+
+        function bukaModal(type) {
+            const modal = document.getElementById(`modal-${type}`);
+            const content = document.getElementById(`modal-${type}-content`);
+            
+            if (type === 'benefit') {
+                document.getElementById('isi-keuntungan').innerHTML = database[activeCategory].keuntungan;
+            }
+            
+            modal.classList.add('modal-open');
+            setTimeout(() => content.classList.add('modal-content-open'), 50);
+        }
+
+        function tutupModal(type) {
+            const modal = document.getElementById(`modal-${type}`);
+            const content = document.getElementById(`modal-${type}-content`);
+            content.classList.remove('modal-content-open');
+            setTimeout(() => modal.classList.remove('modal-open'), 300);
+        }
+
+        function openCheckoutModal() {
+            if (selectedProducts.length === 0) { 
+                alert("Pilih produk dulu!"); 
+                return; 
+            }
+            
+            // Validasi input
+            let valid = true;
+            database[activeCategory].inputs.forEach(inp => {
+                const val = document.getElementById(`input-${inp.id}`).value;
+                if (!val) valid = false;
+            });
+            
+            if (!valid) { 
+                alert("Lengkapi semua data!"); 
+                return; 
+            }
+            
+            // Prepare checkout details
+            const details = document.getElementById('checkout-details');
+            let html = '<div class="font-black text-utama mb-3 text-sm">Pesanan Anda:</div>';
+            
+            cart.forEach(item => {
+                html += `<div class="flex justify-between items-center py-2 border-b border-slate-200 dark:border-slate-700/50 last:border-0">
+                    <span class="text-xs">${item.name}</span>
+                    <span class="text-xs font-bold text-utama">Rp ${item.price.toLocaleString()}</span>
+                </div>`;
+            });
+            
+            // Add total
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            html += `<div class="flex justify-between items-center py-3 mt-2 border-t border-slate-200 dark:border-slate-700">
+                <span class="text-sm font-black">Total</span>
+                <span class="text-lg font-black text-utama">Rp ${total.toLocaleString()}</span>
+            </div>`;
+            
+            // Add user data
+            html += '<div class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">';
+            database[activeCategory].inputs.forEach(inp => {
+                const val = document.getElementById(`input-${inp.id}`).value;
+                html += `<div class="text-xs mb-2"><span class="font-bold">${inp.label}:</span> ${val}</div>`;
+            });
+            html += '</div>';
+            
+            details.innerHTML = html;
+            bukaModal('checkout');
+        }
+
+        function checkoutWA() {
+            let message = `Halo kynas market, saya ingin membeli:\n\n`;
+            
+            cart.forEach(item => {
+                message += `• ${item.name} - Rp ${item.price.toLocaleString()}\n`;
+            });
+            
+            message += `\nKategori: ${database[activeCategory].name}\n`;
+            
+            database[activeCategory].inputs.forEach(inp => {
+                const val = document.getElementById(`input-${inp.id}`).value;
+                message += `${inp.label}: ${val}\n`;
+            });
+            
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            message += `\nTotal: Rp ${total.toLocaleString()}`;
+            
+            const encodedMessage = encodeURIComponent(message);
+            window.open(`https://wa.me/${WA_NUMBER}?text=${encodedMessage}`, '_blank');
+        }
+
+        function checkoutTelegram() {
+            let message = `Halo @${TELEGRAM_USER}, saya ingin membeli:\n\n`;
+            
+            cart.forEach(item => {
+                message += `• ${item.name} - Rp ${item.price.toLocaleString()}\n`;
+            });
+            
+            message += `\nKategori: ${database[activeCategory].name}\n`;
+            
+            database[activeCategory].inputs.forEach(inp => {
+                const val = document.getElementById(`input-${inp.id}`).value;
+                message += `${inp.label}: ${val}\n`;
+            });
+            
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            message += `\nTotal: Rp ${total.toLocaleString()}`;
+            
+            const encodedMessage = encodeURIComponent(message);
+            window.open(`https://t.me/${TELEGRAM_USER}?text=${encodedMessage}`, '_blank');
+        }
+
+        function changeTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            document.getElementById('theme-icon').className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        }
+
+        function toggleMenu() { 
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const isOpen = sidebar.classList.contains('-translate-x-full');
+            
+            if (isOpen) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        window.onload = () => {
+            // Load theme
+            if (localStorage.getItem('theme') === 'light') {
+                document.documentElement.classList.remove('dark');
+                document.getElementById('theme-icon').className = 'fas fa-moon';
+            }
+            
+            // Initialize
+            initCarousel();
+            startCarousel();
+            renderSidebar();
+            renderCategories();
+            pilihKategori('vps');
+            updateCartCount();
+            
+            // Add overlay for sidebar
+            const overlay = document.createElement('div');
+            overlay.id = 'sidebar-overlay';
+            overlay.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden';
+            overlay.onclick = toggleMenu;
+            document.body.appendChild(overlay);
+        };
+    </script>
 </body>
 </html>
